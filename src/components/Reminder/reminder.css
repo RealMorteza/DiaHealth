@@ -1,0 +1,142 @@
+.reminder {
+    margin: 20px 10px;
+}
+
+.reminder-card {
+    display: flex;
+    flex-direction: column;
+    max-width: 380px;
+    margin: 1rem auto;
+    padding: 0.5rem;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'iransans';
+}
+
+.reminder-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #2a7ae4;
+}
+
+/* سکشن‌ها */
+.reminder-section {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    border-radius: 8px;
+    background: #36934f;
+}
+
+.reminder-section h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    color: white;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.reminder-info {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+}
+
+.note {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.check {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+/* حالت تیک‌خورده */
+.check:checked~.reminder-info {
+    text-decoration: line-through;
+    color: #aaa;
+}
+
+/* آکاردئون فردا */
+.collapsible .content {
+    display: none;
+}
+
+.collapsible.open .content {
+    display: block;
+}
+
+/* دکمه روز بعد */
+.next-day {
+    border-radius: 0px;
+    transition: all 1s ease-in;
+    width: 50%;
+    padding: 0.3rem;
+    background: transparent;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: 'iransans';
+    margin: 0 auto;
+    -webkit-transition: all 1s ease-in;
+    -moz-transition: all 1s ease-in;
+    -ms-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -ms-border-radius: 0px;
+    -o-border-radius: 0px;
+}
+
+.next-day:hover {
+    transition: all 1s;
+    border-bottom: 1px #36934f solid;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -ms-border-radius: 0px;
+    -o-border-radius: 0px;
+    -webkit-transition: all 1s;
+    -moz-transition: all 1s;
+    -ms-transition: all 1s;
+    -o-transition: all 1s;
+}
+
+.check {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #36934f;
+    border-radius: 50px;
+    margin-left: 10px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+    -ms-border-radius: 50px;
+    -o-border-radius: 50px;
+}
+
+.check:checked~.reminder-info {
+    opacity: 0.5;
+    text-decoration: line-through;
+}

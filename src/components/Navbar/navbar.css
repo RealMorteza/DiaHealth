@@ -1,0 +1,37 @@
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 0;
+  color: white;
+  background-color: #4A90E2;
+  background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  transform: scale(1.1);
+}
+
+.nav-text {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* آیکون و متن صفحه فعال */
+.nav-item.active {
+  color: #FFD700; /* طلایی یا هر رنگ دلخواه برای حالت فعال */
+}
