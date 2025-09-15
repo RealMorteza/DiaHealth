@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/DiaHealth/sw.js', { scope: '/DiaHealth/' })})}
