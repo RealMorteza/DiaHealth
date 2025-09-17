@@ -7,10 +7,13 @@ import './HomePage.css';
 import { FaUserCircle, FaBell } from 'react-icons/fa';
 import moment from 'moment-jalaali';
 
+
+
 export const HomePage = () => {
     const { patient } = usePatient();
     const { medications } = useMedications();
     const navigate = useNavigate();
+    const today = new Date().toLocaleDateString("fa-IR");
 
     if (!patient) return <p style={{ textAlign: 'center', marginTop: '50px' }}>لطفا وارد شوید</p>;
 
@@ -34,6 +37,8 @@ export const HomePage = () => {
             <div className="welcome-card">
                 <h2>سلام، {patient.name}!</h2>
                 <p>امیدواریم روز خوبی داشته باشید 🌸</p>
+                <p>  {today}   </p>
+                
             </div>
 
             {/* داروهای اخیر */}

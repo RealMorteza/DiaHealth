@@ -1,3 +1,4 @@
+
 .form-overlay {
     position: fixed;
     top: 0;
@@ -9,6 +10,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    font-family: 'iransans';
 }
 
 .form-container {
@@ -31,7 +33,9 @@
     border: 1px solid #ccc;
     font-size: 16px;
 }
-
+.add-form {
+    padding: 5px;
+}
 .datetime-group {
     display: flex;
     gap: 10px;
@@ -62,7 +66,7 @@
 }
 
 .save-btn {
-    background: #36934f;
+    background: #4a90e2;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -70,10 +74,11 @@
     cursor: pointer;
     font-weight: bold;
     transition: 0.2s;
+    font-family: 'iransans';
 }
 
 .save-btn:hover {
-    background: #2e7d41;
+    background: #336eb0;
 }
 
 .cancel-btn {
@@ -84,6 +89,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+    font-family: iransans;
 }
 
 .cancel-btn:hover {
@@ -100,4 +106,4 @@
         opacity: 1;
         transform: scale(1);
     }
-}
+};

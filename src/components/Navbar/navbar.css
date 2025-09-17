@@ -8,8 +8,8 @@
   padding: 12px 0;
   color: white;
   background-color: #4A90E2;
-  background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #71d1d8 0%, #66a6ff 100%);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item {
@@ -33,5 +33,24 @@
 
 /* آیکون و متن صفحه فعال */
 .nav-item.active {
-  color: #FFD700; /* طلایی یا هر رنگ دلخواه برای حالت فعال */
+  color: #FFD700;
+  /* طلایی یا هر رنگ دلخواه برای حالت فعال */
+}
+
+@media (min-width: 1024px) {
+  .navbar {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0;
+    color: white;
+    background-color: #4A90E2;
+    background: linear-gradient(135deg, #71d1d8 0%, #66a6ff 100%);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 25px 25px 0px 0px;
+  }
+  
 }

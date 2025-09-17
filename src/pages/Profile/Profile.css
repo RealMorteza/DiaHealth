@@ -3,7 +3,6 @@
     justify-content: center;
     align-items: center;
     min-height: 80vh;
-    background-color: #f5f5f5;
     padding: 20px;
 }
 
@@ -58,11 +57,42 @@
     width: 65px;
     height: auto;
 }
+
 .body-index {
     display: flex;
     flex-direction: column;
+    direction: ltr;
 }
+
 .body-index h4 {
     margin: 10px auto;
+}
 
+@media screen and (min-width: 1024px) {
+    .profile-card {
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        padding: 30px 40px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+    }
+
+    .body-index {
+        gap: 10px;
+        margin-top: 10px;
+    }
+}
+
+.push-notif {
+    display: flex;
+    padding: 10px;
+}
+
+.push-btn {
+    padding: 5px;
+    margin: 0 auto;
+    border-radius: 5px;
 }

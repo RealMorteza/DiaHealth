@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import "./medications.css";
 import { useMedications } from "../../contexts/MedicationsContext";
 import { usePatient } from "../../contexts/PatientContext.jsx";
@@ -24,7 +24,7 @@ export const Medications = () => {
     }, [patient, patientLoading]);
 
     if (loading || patientLoading) {
-        return <p style={{ textAlign: "center", marginTop: "50px" }}>در حال بارگذاری...</p>;
+        return <div className='loading-text loading-dots'> <p>در حال بارگذاری ...</p> </div>;
     }
 
     const handleEdit = (med) => {
@@ -54,52 +54,62 @@ export const Medications = () => {
                     medications.map((med) => (
                         <li key={med.id} className="med-card">
                             <div className="med-info">
-                                <div>
-                                    <strong>{med.name}</strong> - {med.dose}
-                                    <br />
+                                <div className="med-details">
+                                    {/* نام و دوز */}
+                                    <p><strong>{med.name}</strong></p>
+
+                                    <span className="med-dose">دوز: {med.dose}</span>
+
+                                    {/* دکتر (اختیاری) */}
+                                    {med.doctor && (
+                                        <span className="med-doctor">دکتر: {med.doctor}</span>
+                                    )}
+
+                                    {/* توضیحات */}
+                                    {med.notes && (
+                                        <span className="med-notes">توضیحات: {med.notes}</span>
+                                    )}
+
+                                    {/* تاریخ شروع */}
                                     <span className="time">
-                                        تاریخ شروع:{" "}
+                                        شروع مصرف:{" "}
                                         {med.startDate
-                                            ? moment(new Date(med.startDate)).isValid()
-                                                ? moment(new Date(med.startDate)).format("jYYYY/jMM/jDD")
-                                                : "تاریخ نامعتبر"
+                                            ? new Date(med.startDate).toLocaleDateString("fa-IR")
                                             : "ثبت نشده"}
                                     </span>
-                                    <br />
+
+                                    {/* تاریخ پایان (محاسبه‌شده یا دستی) */}
                                     <span className="time">
-                                        تاریخ پایان:{" "}
+                                        پایان مصرف:{" "}
                                         {med.endDate
-                                            ? moment(new Date(med.endDate)).isValid()
-                                                ? moment(new Date(med.endDate)).format("jYYYY/jMM/jDD")
-                                                : "تاریخ نامعتبر"
-                                            : "ثبت نشده"}
+                                            ? new Date(med.endDate).toLocaleDateString("fa-IR")
+                                            : med.duration
+                                                ? new Date(
+                                                    new Date(med.startDate).getTime() +
+                                                    med.duration * 24 * 60 * 60 * 1000
+                                                ).toLocaleDateString("fa-IR")
+                                                : "ثبت نشده"}
                                     </span>
-                                    <br />
-                                    <span className="time">
-                                        زمان مصرف: {med.time || "ثبت نشده"}
-                                    </span>
-                                    <br />
-                                    <span className="time">
-                                        {med.daily && "روزانه "}
-                                        {med.weekly && "هفتگی "}
-                                        {med.monthly && "ماهانه"}
-                                    </span>
+
+                                    {/* تنظیمات مصرف */}
+                                    {med.daily ? (
+                                        <span className="time">مصرف روزانه در ساعت: {med.time || "ثبت نشده"}</span>
+                                    ) : med.hourly ? (
+                                        <span className="time">هر {med.hourly} ساعت یکبار</span>
+                                    ) : (
+                                        <span className="time">نوع مصرف: ثبت نشده</span>
+                                    )}
                                 </div>
+
+                                {/* اکشن‌ها */}
                                 <div className="med-actions">
                                     <input
                                         type="checkbox"
                                         checked={med.done}
                                         onChange={() => toggleDone(med.id)}
                                     />
-                                    <button className="edit" onClick={() => handleEdit(med)}>
-                                        ✏️
-                                    </button>
-                                    <button
-                                        className="delete"
-                                        onClick={() => deleteMedication(med.id)}
-                                    >
-                                        🗑️
-                                    </button>
+                                    <button className="edit" onClick={() => handleEdit(med)}>✏️</button>
+                                    <button className="delete" onClick={() => deleteMedication(med.id)}>🗑️</button>
                                 </div>
                             </div>
                         </li>
