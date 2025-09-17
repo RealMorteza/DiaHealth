@@ -9,7 +9,7 @@ import Profile from './pages/Profile/Profile.jsx';
 import { usePatient } from './contexts/PatientContext.jsx';
 import { HomePage } from './components/HomePage/HomePage.jsx';
 import { PushTestNotif } from "./pages/PushTestNotif/PushTestNotif.jsx";
-import { ReminderPage } from "./pages/Reminder/Reminder.jsx";
+ // import { ReminderPage } from "./pages/Reminder/Reminder.jsx"; 
 
 // مسیرهای محافظت شده
 function ProtectedRoute({ children }) {
@@ -32,7 +32,7 @@ function AppRoutes() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/notiftest" element={<PushTestNotif />} />
-          <Route path="reminder" element={<ReminderPage />} />
+          {/*}<Route path="reminder" element={<ReminderPage />} /> {*/}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

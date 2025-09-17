@@ -37,8 +37,9 @@
     background-color: #4a90e2;
     font-family: 'iransans';
     display: block;
-    width: 100%;
-    padding: 10px;
+    width: 50%;
+    margin: 0 auto;
+    padding: 5px;
     margin-top: 20px;
     color: #fff;
     border: none;
@@ -61,7 +62,6 @@
 .body-index {
     display: flex;
     flex-direction: column;
-    direction: ltr;
 }
 
 .body-index h4 {

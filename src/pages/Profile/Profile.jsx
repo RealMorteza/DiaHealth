@@ -131,14 +131,7 @@ const ProfilePage = () => {
                     <p className='IW'><strong>📌 Ideal Weight (وزن ایده آل):</strong> {IW} کیلوگرم</p>
                 </div>
                 <hr/>
-                <div className="push-notif">
-                    <button className="push-btn" onClick={registerPush} disabled={pushEnabled}>
-                        {pushEnabled ? "یادآوری‌ها فعال شدند ✅" : "فعال کردن یادآوری‌ها 🔔"}
-                    </button>
-                </div>
-                {/* دکمه فعال کردن یادآوری‌ها */}
-
-
+                
                 <button className="logout-btn" onClick={logout}>خروج ◀</button>
             </div>
         </div>

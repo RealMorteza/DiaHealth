@@ -38,7 +38,7 @@ export const HomePage = () => {
                 <h2>سلام، {patient.name}!</h2>
                 <p>امیدواریم روز خوبی داشته باشید 🌸</p>
                 <p>  {today}   </p>
-                
+
             </div>
 
             {/* داروهای اخیر */}
@@ -50,8 +50,12 @@ export const HomePage = () => {
                     <ul>
                         {recentMeds.map(med => (
                             <li key={med.id}>
-                                <strong>{med.name}</strong> - {med.dose}
-                                <span> ({med.time || 'زمان ثبت نشده'})</span>
+                                <span>
+                                    <strong>{med.name}</strong> - {med.dose}
+                                </span>
+                                <span>
+                                        زمان:
+                                     ({med.time || 'زمان ثبت نشده'})</span>
                                 <span>
                                     {med.daily ? "روزانه" : null}
                                 </span>
