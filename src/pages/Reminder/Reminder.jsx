@@ -1,4 +1,4 @@
-/* src/pages/Reminder.jsx
+
 import React, { useState } from "react";
 import { useMedications } from "../../contexts/MedicationsContext";
 
@@ -94,4 +94,4 @@ export const ReminderPage = () => {
             </ul>
         </div>
     );
-}; */
+};

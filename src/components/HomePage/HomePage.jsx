@@ -54,8 +54,8 @@ export const HomePage = () => {
                                     <strong>{med.name}</strong> - {med.dose}
                                 </span>
                                 <span>
-                                        زمان:
-                                     ({med.time || 'زمان ثبت نشده'})</span>
+                                    زمان:
+                                    ({med.time || 'زمان ثبت نشده'})</span>
                                 <span>
                                     {med.daily ? "روزانه" : null}
                                 </span>
@@ -68,17 +68,12 @@ export const HomePage = () => {
                 </button>
             </div>
 
-            {/* ویدیو آموزشی */}
             <div className="video-card">
                 <h3>ویدیو آموزشی</h3>
                 <div className="video-wrapper">
-                    <iframe
-                        src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                        title="آموزش دیابت"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                    />
+                    <iframe src="https://www.aparat.com/video/video/embed/videohash/adtfn08/vt/frame?titleShow=true" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                    <iframe src="https://www.aparat.com/video/video/embed/videohash/e5K1P/vt/frame" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                    <iframe src="https://www.aparat.com/video/video/embed/videohash/lpqnofn/vt/frame" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                 </div>
             </div>
         </div>

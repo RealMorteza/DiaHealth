@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 // --- اتصال به Supabase ---
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY // حتماً service_role key استفاده کن (نه anon)
+    process.env.SUPABASE_SERVICE_ROLE_KEY 
 );
 
 // --- کلیدهای VAPID ---

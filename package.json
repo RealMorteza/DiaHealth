@@ -1,6 +1,5 @@
 {
   "name": "diahealth",
-  "homepage": "https://RealMorteza.github.io/DiaHealth",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,13 +8,14 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "start": "node server.js"
   },
   "dependencies": {
     "@majidh1/jalalidatepicker": "^0.9.12",
     "@supabase/supabase-js": "^2.57.2",
     "dayjs": "^1.11.18",
+    "express": "^4.21.2",
     "jalaali-js": "^1.2.8",
     "moment-jalaali": "^0.10.4",
     "react": "^19.1.1",
