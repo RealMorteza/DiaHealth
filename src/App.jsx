@@ -9,7 +9,8 @@ import Profile from './pages/Profile/Profile.jsx';
 import { usePatient } from './contexts/PatientContext.jsx';
 import { HomePage } from './components/HomePage/HomePage.jsx';
 import { PushTestNotif } from "./pages/PushTestNotif/PushTestNotif.jsx";
-import { ReminderPage } from "./pages/Reminder/Reminder.jsx"; 
+import { ReminderPage } from "./pages/Reminder/Reminder.jsx";
+import { About } from "./pages/About/About.jsx";
 
 // مسیرهای محافظت شده
 function ProtectedRoute({ children }) {
@@ -23,6 +24,11 @@ function ProtectedRoute({ children }) {
 }
 
 function AppRoutes() {
+
+  const location = useLocation();
+  const authPaths = ['/login', '/auth', '/register'];
+  const hideNavbar = authPaths.some(p => location.pathname.startsWith(p));
+
   return (
     <>
       <div className="page-content" style={{ paddingBottom: "70px" }}>
@@ -32,11 +38,14 @@ function AppRoutes() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/notiftest" element={<PushTestNotif />} />
-          <Route path="reminder" element={<ReminderPage />} /> 
+          <Route path="/reminder" element={<ReminderPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
-      <Navbar />
+
+      {/* Navbar فقط وقتی نمایش داده میشه که در صفحات احراز هویت نباشیم */}
+      {!hideNavbar && <Navbar />}
     </>
   );
 }

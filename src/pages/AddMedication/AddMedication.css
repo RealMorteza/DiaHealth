@@ -1,4 +1,3 @@
-
 .form-overlay {
     position: fixed;
     top: 0;
@@ -10,7 +9,6 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    font-family: 'iransans';
 }
 
 .form-container {
@@ -23,6 +21,24 @@
     animation: fadeIn 0.3s ease-in-out;
 }
 
+.form-container textarea {
+    width: 100%;
+    height: 60px;
+    border-radius: 5px;
+    border: 1px solid #c3c3c3;
+    ;
+    padding: 5px;
+    font-family: 'Iransans';
+}
+
+.hourlyInterval {
+    width: 100%;
+    height: 25px;
+    border: 1px solid #c3c3c3;
+    border-radius: 10px;
+    padding: 5px;
+}
+
 .add-form input[type="text"],
 .add-form input[type="date"],
 .add-form input[type="time"] {
@@ -33,13 +49,34 @@
     border: 1px solid #ccc;
     font-size: 16px;
 }
+
+.add-form input {
+    font-family: 'iransans' !important;
+}
+
 .add-form {
     padding: 5px;
 }
+
 .datetime-group {
     display: flex;
+    flex-direction: column;
     gap: 10px;
     margin-bottom: 15px;
+}
+
+.datetime-group .duration {
+    width: 100%;
+    height: 25px;
+    border: 1px solid #c3c3c3;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.checkbox-group label {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .datetime-item label {
@@ -106,4 +143,6 @@
         opacity: 1;
         transform: scale(1);
     }
-};
+}
+
+;

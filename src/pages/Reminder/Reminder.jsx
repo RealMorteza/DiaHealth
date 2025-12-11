@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useMedications } from "../../contexts/MedicationsContext";
+import './Reminder.css'
 
 const VAPID_PUBLIC_KEY =
     "BEZ_jGbPcW7Mxb9jKULJXduCzwVe-XFrCwBEUity3Rex_9eGMLhSxddh3hurAJQEwYLKF_J4dPv-2V5DfdjrI84"; // جایگزین با کلید درست
@@ -74,24 +75,32 @@ export const ReminderPage = () => {
     };
 
     return (
-        <div style={{ padding: 20 }}>
-            <h2>یادآوری داروها</h2>
-            <button onClick={subscribeUser} disabled={pushEnabled}>
-                {pushEnabled ? "فعال ✅" : "فعال کردن یادآوری 🔔"}
-            </button>
+        <div className="main-container" style={{ padding: 20 }}>
+            <div className="header">
+                <h2>یادآوری داروها</h2>
+            </div>
+            <div className="medication-list">
+                <ul>
+                    {medications.map((m) => (
+                        <li key={m.id}>
+                            {m.name} - {m.dose}{" "}
+                            {m.daily
+                                ? `هر روز ${m.time}`
+                                : m.hourly
+                                    ? `هر ${m.hourly} ساعت`
+                                    : ""}
+                        </li>
+                    ))}
+                </ul>
+                <hr></hr>
+            </div>
+            <div className="medication-setting">
+                <h3>تنظیمات:</h3>
+                <button onClick={subscribeUser} disabled={pushEnabled}>
+                    {pushEnabled ? "یادآوری فعال ✅" : "فعال کردن یادآوری 🔔"}
+                </button>
+            </div>
 
-            <ul>
-                {medications.map((m) => (
-                    <li key={m.id}>
-                        {m.name} - {m.dose}{" "}
-                        {m.daily
-                            ? `هر روز ${m.time}`
-                            : m.hourly
-                                ? `هر ${m.hourly} ساعت`
-                                : ""}
-                    </li>
-                ))}
-            </ul>
         </div>
     );
 };

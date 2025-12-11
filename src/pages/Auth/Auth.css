@@ -5,8 +5,13 @@
     align-items: center;
     height: 100vh;
     background: linear-gradient(to bottom right, #6a11cb, #2575fc);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'iransans';
 }
+.auth-logo {
+    width: 180px;
+    margin: 0 auto;
+}
+
 
 /* فرم */
 .auth-form {
@@ -24,7 +29,6 @@
 .auth-form h2 {
     text-align: center;
     color: #333;
-    margin-bottom: 20px;
 }
 
 /* فیلدهای فرم */
@@ -35,6 +39,10 @@
     font-size: 16px;
     outline: none;
     transition: 0.3s;
+    font-family: 'iransans';
+}
+.auth-form button {
+    font-family: 'iransans';
 }
 
 .auth-form input:focus {

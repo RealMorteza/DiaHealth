@@ -168,8 +168,11 @@ const AuthPage = () => {
 
     return (
         <div className="auth-container">
+
             <form className="auth-form" onSubmit={handleSubmit}>
+                <img className='auth-logo' src='src\assets\logo\diahealth.svg'></img>
                 <h2>{isSignup ? 'ثبت نام' : 'ورود'}</h2>
+                <hr></hr>
                 {errors.auth && <div className="error">{errors.auth}</div>}
 
                 <input type="tel" placeholder="شماره تلفن" value={phone} onChange={e => setPhone(e.target.value)} />

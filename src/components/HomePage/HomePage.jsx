@@ -29,7 +29,7 @@ export const HomePage = () => {
                 />
                 <FaBell
                     className="icon bell-icon"
-                    onClick={() => navigate('/reminders')}
+                    onClick={() => navigate('/reminder')}
                 />
             </div>
 
@@ -75,6 +75,10 @@ export const HomePage = () => {
                     <iframe src="https://www.aparat.com/video/video/embed/videohash/e5K1P/vt/frame" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                     <iframe src="https://www.aparat.com/video/video/embed/videohash/lpqnofn/vt/frame" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                 </div>
+            </div>
+            <div className="footer">
+                <button className='about-btn' onClick={() => navigate('/about')}> درباره </button>
+                <button className='support-btn' onClick={() => navigate('/support')}> پشتیبانی </button>
             </div>
         </div>
     );

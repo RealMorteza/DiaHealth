@@ -1,0 +1,11 @@
+.main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.medication-list {
+    padding: 8px;
+}
+.medication-list ul {
+    margin-bottom: 10px;
+}

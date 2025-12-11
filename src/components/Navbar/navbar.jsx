@@ -23,7 +23,7 @@ const Navbar = () => {
       </NavLink>
 
       <NavLink
-        to="/reminders"
+        to="/reminder"
         className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
       >
         <FaBell size={24} />

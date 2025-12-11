@@ -131,7 +131,7 @@ export const AddMedication = ({ onClose, editingMed }) => {
 
                         <div className="datetime-item">
                             <label>مدت مصرف (روز):</label>
-                            <input type="number" name="duration" min="1" placeholder="مثلاً 10"
+                            <input type="number" name="duration" className="duration" min="1" placeholder="مثلاً 10"
                                 value={formData.duration} onChange={handleChange} />
                         </div>
 
@@ -160,9 +160,8 @@ export const AddMedication = ({ onClose, editingMed }) => {
                             مصرف ساعتی
                         </label>
                         {formData.hourlyEnabled && (
-                            <input type="number" name="hourlyInterval" min="1"
+                            <input type="number" name="hourlyInterval" className="hourlyInterval" min="1"
                                 placeholder="هر چند ساعت یکبار؟"
-                                value={formData.hourlyInterval}
                                 onChange={handleChange} required />
                         )}
                     </div>

@@ -6,7 +6,7 @@
 
 body {
     background-color: #ffffff;
-    font-family: iransans;
+    font-family: 'iransans'!important;
     direction: rtl;
 
 }
