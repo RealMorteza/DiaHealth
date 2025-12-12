@@ -110,7 +110,7 @@
     -o-border-radius: 15px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
 }
 
 .footer button {

@@ -31,7 +31,7 @@ function AppRoutes() {
 
   return (
     <>
-      <div className="page-content" style={{ paddingBottom: "70px" }}>
+      <div className="page-content" >
         <Routes>
           <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/medications" element={<ProtectedRoute><Medications /></ProtectedRoute>} />

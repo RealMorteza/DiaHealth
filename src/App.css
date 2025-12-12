@@ -1,5 +1,5 @@
 body {
-  background: linear-gradient(135deg, #f0f4f8, #e6f0fa);
+  background: linear-gradient(135deg, #f0f4f8, #e6f0fa); 
   font-family: 'iransans';
 }
 @media (min-width: 1024px) {
@@ -8,6 +8,9 @@ body {
     margin: 0 auto;
   }
 }
+/* .page-content {
+  padding-bottom: 35px;
+} */
 
 .loading-text {
   font-size: 1.6rem;

@@ -113,6 +113,7 @@ const ProfilePage = () => {
             <div className="profile-card">
                 <img className='user_icon' src={user_icon} />
                 <h1>پروفایل</h1>
+                <hr/>
                 <p><strong>نام:</strong> {patient.name}</p>
                 <p><strong>نام خانوادگی:</strong> {patient.family}</p>
                 <p><strong>جنسیت:</strong> {genderMap[patient.gender] || '-'}</p>

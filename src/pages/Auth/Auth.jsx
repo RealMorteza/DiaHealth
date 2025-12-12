@@ -175,7 +175,7 @@ const AuthPage = () => {
                 <hr></hr>
                 {errors.auth && <div className="error">{errors.auth}</div>}
 
-                <input type="tel" placeholder="شماره تلفن" value={phone} onChange={e => setPhone(e.target.value)} />
+                <input type="tel" className='tel-signup' placeholder="شماره تلفن" value={phone} onChange={e => setPhone(e.target.value)} />
                 {errors.phone && <div className="error">{errors.phone}</div>}
 
                 {isSignup && (
@@ -198,7 +198,6 @@ const AuthPage = () => {
                             ref={birthDateInputRef}
                             type="text"
                             placeholder="تاریخ تولد (مثال: 1370/01/15)"
-                            defaultValue={todayJalali}
                             onInput={handleInput}
                             onKeyDown={handleKeyDown}
                             maxLength={10}
