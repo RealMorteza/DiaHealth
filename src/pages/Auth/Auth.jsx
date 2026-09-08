@@ -165,79 +165,93 @@ const AuthPage = () => {
             setTimeout(() => setWaiting(false), 5000);
         }
     };
+    function CheckForm() {
 
-    return (
-        <div className="auth-container">
+        const handleSubmit = (e) => {
+            e.preventDefault();
 
-            <form className="auth-form" onSubmit={handleSubmit}>
-                <img className='auth-logo' src='src\assets\logo\diahealth.svg'></img>
-                <h2>{isSignup ? 'ثبت نام' : 'ورود'}</h2>
-                <hr></hr>
-                {errors.auth && <div className="error">{errors.auth}</div>}
+            if (!name || !tel) {
+                alert('همه فیلدها رو پر کن');
+                return;
+            }
 
-                <input type="tel" className='tel-signup' placeholder="شماره تلفن" value={phone} onChange={e => setPhone(e.target.value)} />
-                {errors.phone && <div className="error">{errors.phone}</div>}
+            // submit logic
+        }; }
+        CheckForm();
 
-                {isSignup && (
-                    <>
-                        <input placeholder="نام" value={name} onChange={e => setName(e.target.value)} />
-                        {errors.name && <div className="error">{errors.name}</div>}
+        return (
+            <div className="auth-container">
 
-                        <input placeholder="نام خانوادگی" value={family} onChange={e => setFamily(e.target.value)} />
-                        {errors.family && <div className="error">{errors.family}</div>}
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <img className='auth-logo' src='src\assets\logo\diahealth.svg'></img>
+                    <h2>{isSignup ? 'ثبت نام' : 'ورود'}</h2>
+                    <hr></hr>
+                    {errors.auth && <div className="error">{errors.auth}</div>}
 
-                        <select value={gender} onChange={e => setGender(e.target.value)}>
-                            <option value="">جنسیت</option>
-                            <option value="male">مرد</option>
-                            <option value="female">زن</option>
-                            <option value="other">سایر</option>
-                        </select>
-                        {errors.gender && <div className="error">{errors.gender}</div>}
+                    <input type="tel" className='tel-signup' placeholder="شماره تلفن" value={phone} onChange={e => setPhone(e.target.value)} />
+                    {errors.phone && <div className="error">{errors.phone}</div>}
 
-                        <input
-                            ref={birthDateInputRef}
-                            type="text"
-                            placeholder="تاریخ تولد (مثال: 1370/01/15)"
-                            onInput={handleInput}
-                            onKeyDown={handleKeyDown}
-                            maxLength={10}
-                        />
-                        {errors.birth_date && <div className="error">{errors.birth_date}</div>}
+                    {isSignup && (
+                        <>
+                            <input className='name' placeholder="نام" value={name} onChange={e => setName(e.target.value)} />
+                            {errors.name && <div className="error">{errors.name}</div>}
 
-                        <select value={diabetesType} onChange={e => setDiabetesType(e.target.value)}>
-                            <option value="">نوع دیابت</option>
-                            <option value="1">نوع 1</option>
-                            <option value="2">نوع 2</option>
-                        </select>
-                        {errors.diabetesType && <div className="error">{errors.diabetesType}</div>}
+                            <input className='family-name' placeholder="نام خانوادگی" value={family} onChange={e => setFamily(e.target.value)} />
+                            {errors.family && <div className="error">{errors.family}</div>}
 
-                        <input placeholder="آلرژی‌ها (اختیاری)" value={allergies} onChange={e => setAllergies(e.target.value)} />
-                        <input type="number" placeholder="وزن (kg)" value={weight} onChange={e => setWeight(e.target.value)} />
-                        {errors.weight && <div className="error">{errors.weight}</div>}
-                        <input type="number" placeholder="قد (cm)" value={height} onChange={e => setHeight(e.target.value)} />
-                        {errors.height && <div className="error">{errors.height}</div>}
-                    </>
-                )}
+                            <select value={gender} onChange={e => setGender(e.target.value)}>
+                                <option value="">جنسیت</option>
+                                <option value="male">مرد</option>
+                                <option value="female">زن</option>
+                                <option value="other">سایر</option>
+                            </select>
+                            {errors.gender && <div className="error">{errors.gender}</div>}
 
-                <input placeholder="رمز عبور" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-                {errors.password && <div className="error">{errors.password}</div>}
+                            <input
+                                ref={birthDateInputRef}
+                                type="text"
+                                placeholder="تاریخ تولد (مثال: 1370/01/15)"
+                                onInput={handleInput}
+                                onKeyDown={handleKeyDown}
+                                maxLength={10}
+                            />
+                            {errors.birth_date && <div className="error">{errors.birth_date}</div>}
 
-                <button type="submit" className="submit-btn">{isSignup ? 'ثبت نام' : 'ورود'}</button>
-                <button type="button" className="toggle-btn" onClick={() => setIsSignup(!isSignup)}>
-                    {isSignup ? 'قبلا ثبت نام کرده‌ام' : 'ساخت حساب جدید'}
-                </button>
-            </form>
+                            <select value={diabetesType} onChange={e => setDiabetesType(e.target.value)}>
+                                <option value="">نوع دیابت</option>
+                                <option value="1">نوع 1</option>
+                                <option value="2">نوع 2</option>
+                            </select>
+                            {errors.diabetesType && <div className="error">{errors.diabetesType}</div>}
 
-            {waiting && (
-                <div className="waiting-modal">
-                    <div className="waiting-content">
-                        <div className="spinner"></div>
-                        <p>{waitingMessage}</p>
+                            <input placeholder="آلرژی‌ها (اختیاری)" value={allergies} onChange={e => setAllergies(e.target.value)} />
+                            <input type="number" placeholder="وزن (kg)" value={weight} onChange={e => setWeight(e.target.value)} />
+                            {errors.weight && <div className="error">{errors.weight}</div>}
+                            <input type="number" placeholder="قد (cm)" value={height} onChange={e => setHeight(e.target.value)} />
+                            {errors.height && <div className="error">{errors.height}</div>}
+                        </>
+                    )}
+
+                    <input placeholder="رمز عبور" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+                    {errors.password && <div className="error">{errors.password}</div>}
+
+                    <button type="submit" className="submit-btn">{isSignup ? 'ثبت نام' : 'ورود'}</button>
+                    <button type="button" className="toggle-btn" onClick={() => setIsSignup(!isSignup)}>
+                        {isSignup ? 'قبلا ثبت نام کرده‌ام' : 'ساخت حساب جدید'}
+                    </button>
+                </form>
+
+                {waiting && (
+                    <div className="waiting-modal">
+                        <div className="waiting-content">
+                            <div className="spinner"></div>
+                            <p>{waitingMessage}</p>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
-    );
-};
+                )}
+            </div>
+        );
 
-export default AuthPage;
+    };
+
+    export default AuthPage;

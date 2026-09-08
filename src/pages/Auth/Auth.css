@@ -3,9 +3,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     background: linear-gradient(to bottom right, #6a11cb, #2575fc);
     font-family: 'iransans';
+    height: 100%;
+    padding: 25px;
+    min-height: 100vh;
 }
 
 .auth-logo {
@@ -42,9 +44,11 @@
     transition: 0.3s;
     font-family: 'iransans';
 }
+
 .tel-signup::placeholder {
     text-align: right;
 }
+
 .auth-form button {
     font-family: 'iransans';
 }
