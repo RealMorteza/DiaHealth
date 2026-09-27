@@ -1,11 +1,23 @@
-.main-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.medication-list {
-    padding: 8px;
-}
-.medication-list ul {
-    margin-bottom: 10px;
-}
+.reminder-page { padding-top: 24px; }
+.reminder-hero { padding: 24px 18px; border: 1px solid var(--border-soft); border-radius: 22px; background: var(--surface); box-shadow: var(--shadow-sm); text-align: center; }
+.reminder-hero.active { background: linear-gradient(160deg, #fff 25%, #ebfaf6 100%); border-color: #ccece2; }
+.reminder-bell { width: 72px; height: 72px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 24px; background: var(--primary-soft); color: var(--primary); font-size: 1.9rem; }
+.reminder-hero.active .reminder-bell { background: #dff6ef; color: var(--success); }
+.reminder-hero h2 { color: var(--text); font-size: 1.08rem; }
+.reminder-hero > p { max-width: 350px; margin: 8px auto 0; color: var(--text-muted); font-size: .78rem; line-height: 1.85; }
+.permission-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 15px; padding: 7px 10px; border-radius: 999px; background: var(--surface-muted); color: var(--text-muted); font-size: .72rem; }
+.permission-granted { background: #e1f7ef; color: #208165; }
+.permission-denied { background: #fff0f0; color: var(--danger); }
+.reminder-action { width: 100%; margin-top: 18px; }
+.reminder-message { padding: 9px; border-radius: 10px; background: rgba(255,255,255,.7); }
+.schedule-section { margin-top: 16px; padding: 17px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.section-heading h2 { color: var(--text); font-size: 1rem; }
+.section-heading > span { padding: 4px 8px; border-radius: 8px; background: var(--primary-soft); color: var(--primary-dark); font-size: .7rem; }
+.schedule-list { display: flex; flex-direction: column; gap: 9px; list-style: none; }
+.schedule-list li { display: flex; align-items: center; gap: 11px; padding: 11px; border-radius: 13px; background: var(--surface-muted); }
+.schedule-time { min-width: 55px; padding: 7px; border-radius: 10px; background: #fff; color: var(--primary-dark); font-weight: 800; text-align: center; direction: ltr; }
+.schedule-list strong, .schedule-list span { display: block; }
+.schedule-list strong { color: var(--text); font-size: .86rem; }
+.schedule-list span { color: var(--text-muted); font-size: .72rem; }
+.compact-empty { padding: 20px 10px; color: var(--text-muted); font-size: .8rem; line-height: 1.8; text-align: center; }

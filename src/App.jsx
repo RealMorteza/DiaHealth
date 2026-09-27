@@ -6,11 +6,11 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Medications } from './pages/Medications/Medications.jsx';
 import AuthPage from './pages/Auth/Auth.jsx';
 import Profile from './pages/Profile/Profile.jsx';
-import { usePatient } from './contexts/PatientContext.jsx';
+import { usePatient } from './contexts/usePatient.js';
 import { HomePage } from './components/HomePage/HomePage.jsx';
-import { PushTestNotif } from "./pages/PushTestNotif/PushTestNotif.jsx";
 import { ReminderPage } from "./pages/Reminder/Reminder.jsx";
 import { About } from "./pages/About/About.jsx";
+import { MedicationReminder } from './components/MedicationReminder/MedicationReminder.jsx';
 
 // مسیرهای محافظت شده
 function ProtectedRoute({ children }) {
@@ -31,16 +31,16 @@ function AppRoutes() {
 
   return (
     <>
+      <MedicationReminder />
       <div className="page-content" >
         <Routes>
           <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/medications" element={<ProtectedRoute><Medications /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/login" element={<AuthPage />} />
-          <Route path="/notiftest" element={<PushTestNotif />} />
-          <Route path="/reminder" element={<ReminderPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/reminder" element={<ProtectedRoute><ReminderPage /></ProtectedRoute>} />
           <Route path="/about" element={<About />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
 

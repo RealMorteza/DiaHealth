@@ -1,177 +1,132 @@
-import React, { useState } from "react";
-import { useMedications } from "../../contexts/MedicationsContext";
-import { usePatient } from "../../contexts/PatientContext";
-import "./AddMedication.css";
+import { useState } from 'react';
+import { useMedications } from '../../contexts/useMedications.js';
+import { JalaliDatePicker } from '../../components/JalaliDatePicker/JalaliDatePicker.jsx';
+import './AddMedication.css';
+
+function addDays(dateValue, duration) {
+  if (!dateValue || !duration) return null;
+  const date = new Date(`${dateValue}T12:00:00`);
+  date.setDate(date.getDate() + Number(duration));
+  return date.toISOString().slice(0, 10);
+}
+
+function getTodayIso() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
 
 export const AddMedication = ({ onClose, editingMed }) => {
-    const { addMedication, updateMedication } = useMedications();
-    const { patient } = usePatient();
+  const { addMedication, updateMedication } = useMedications();
+  const [form, setForm] = useState({
+    name: editingMed?.name || '',
+    dose: editingMed?.dose || '',
+    doctor: editingMed?.doctor || '',
+    notes: editingMed?.notes || '',
+    startDate: editingMed?.startDate?.slice(0, 10) || getTodayIso(),
+    duration: editingMed?.duration ? String(editingMed.duration) : '',
+    endDate: editingMed?.endDate?.slice(0, 10) || '',
+    schedule: editingMed?.daily ? 'daily' : editingMed?.hourly ? 'hourly' : 'daily',
+    time: editingMed?.time || '08:00',
+    hourly: editingMed?.hourly ? String(editingMed.hourly) : '8',
+    done: Boolean(editingMed?.done),
+  });
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-    const todayISO = new Date().toISOString().split("T")[0];
+  const update = (name, value) => {
+    setForm((current) => ({ ...current, [name]: value }));
+    setError('');
+  };
 
-    const [formData, setFormData] = useState({
-        name: editingMed?.name || "",
-        dose: editingMed?.dose || "",
-        doctor: editingMed?.doctor || "",
-        notes: editingMed?.notes || "",
-        startDate: editingMed?.startDate ? editingMed.startDate.split("T")[0] : todayISO,
-        duration: editingMed?.duration != null ? String(editingMed.duration) : "", // as string for input
-        endDate: editingMed?.endDate ? editingMed.endDate.split("T")[0] : "",
-        time: editingMed?.time || "",
-        daily: !!editingMed?.daily,
-        hourlyEnabled: editingMed?.hourly != null,
-        hourlyInterval: editingMed?.hourly != null ? String(editingMed.hourly) : "",
-        done: !!editingMed?.done,
-    });
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!form.name.trim() || !form.dose.trim()) {
+      setError('نام دارو و مقدار دوز را وارد کنید.');
+      return;
+    }
+    if (form.schedule === 'daily' && !form.time) {
+      setError('ساعت مصرف روزانه را انتخاب کنید.');
+      return;
+    }
+    if (form.endDate && form.endDate < form.startDate) {
+      setError('تاریخ پایان نمی‌تواند پیش از تاریخ شروع باشد.');
+      return;
+    }
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        // اگر کاربر daily را فعال کند، hourly غیر فعال شود و برعکس
-        if (name === "daily") {
-            setFormData(prev => ({
-                ...prev,
-                daily: checked,
-                hourlyEnabled: checked ? false : prev.hourlyEnabled,
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: type === "checkbox" ? checked : value,
-            }));
-        }
+    const duration = form.duration ? Number(form.duration) : null;
+    const medication = {
+      name: form.name.trim(),
+      dose: form.dose.trim(),
+      doctor: form.doctor.trim() || null,
+      notes: form.notes.trim() || null,
+      startDate: form.startDate,
+      endDate: form.endDate || addDays(form.startDate, duration),
+      duration,
+      daily: form.schedule === 'daily',
+      time: form.schedule === 'daily' ? form.time : null,
+      hourly: form.schedule === 'hourly' ? Number(form.hourly) : null,
+      done: form.done,
     };
 
-    const handleHourlyToggle = (e) => {
-        const checked = e.target.checked;
-        setFormData(prev => ({
-            ...prev,
-            hourlyEnabled: checked,
-            hourlyInterval: checked ? (prev.hourlyInterval || "8") : "",
-            daily: checked ? false : prev.daily, // جلوگیری از هم‌زمان بودن
-        }));
-    };
+    setSaving(true);
+    try {
+      const result = editingMed
+        ? await updateMedication(editingMed.id, medication)
+        : await addMedication(medication);
+      if (result.error) {
+        setError('ذخیره دارو انجام نشد. اتصال اینترنت و اطلاعات فرم را بررسی کنید.');
+        return;
+      }
+      onClose();
+    } catch {
+      setError('خطای پیش‌بینی‌نشده‌ای رخ داد. دوباره تلاش کنید.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
-    const calculateEndDate = (start, durationDays) => {
-        const d = parseInt(durationDays, 10);
-        if (!start || Number.isNaN(d)) return null;
-        const s = new Date(start);
-        s.setDate(s.getDate() + d);
-        return s.toISOString().split("T")[0];
-    };
-
-    const sanitizeInt = (val) => {
-        if (val === "" || val == null) return null;
-        const n = parseInt(val, 10);
-        return Number.isNaN(n) ? null : n;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            const endDateCalc = formData.endDate
-                ? formData.endDate
-                : formData.duration
-                    ? calculateEndDate(formData.startDate || todayISO, formData.duration)
-                    : null;
-
-            const medData = {
-                name: formData.name.trim() || null,
-                dose: formData.dose.trim() || null,
-                doctor: formData.doctor.trim() || null,
-                notes: formData.notes.trim() || null,
-                startDate: formData.startDate || todayISO, // YYYY-MM-DD
-                endDate: endDateCalc,
-                time: formData.daily ? (formData.time || null) : null,
-                daily: !!formData.daily,
-                hourly: formData.hourlyEnabled ? sanitizeInt(formData.hourlyInterval) : null,
-                duration: sanitizeInt(formData.duration),
-                done: !!formData.done,
-                // اگر نیاز داری patient_id دستی بفرستی:
-                patient_id: patient?.id ?? null,
-            };
-
-            // برای اطمینان: چاپ کن ببینی چه چیزی می‌فرستی
-            console.log("medData to send:", medData);
-
-            if (editingMed) {
-                await updateMedication(editingMed.id, medData);
-            } else {
-                await addMedication(medData);
-            }
-
-            onClose();
-        } catch (err) {
-            console.error("AddMedication submit error:", err);
-            alert("خطا هنگام ذخیره‌سازی، کنسول را بررسی کنید.");
-        }
-    };
-
-    return (
-        <div className="form-overlay">
-            <div className="form-container">
-                <h3>{editingMed ? "✏️ ویرایش دارو" : "➕ افزودن دارو"}</h3>
-                <form onSubmit={handleSubmit} className="add-form">
-                    <input type="text" name="name" placeholder="نام دارو"
-                        value={formData.name} onChange={handleChange} required />
-                    <input type="text" name="dose" placeholder="دوز (مثلاً 500mg)"
-                        value={formData.dose} onChange={handleChange} required />
-
-                    <input type="text" name="doctor" placeholder="نام دکتر (اختیاری)"
-                        value={formData.doctor} onChange={handleChange} />
-                    <textarea name="notes" placeholder="توضیحات..."
-                        value={formData.notes} onChange={handleChange} />
-
-                    <div className="datetime-group">
-                        <div className="datetime-item">
-                            <label>تاریخ شروع:</label>
-                            <input type="date" name="startDate"
-                                value={formData.startDate} onChange={handleChange} required />
-                        </div>
-
-                        <div className="datetime-item">
-                            <label>مدت مصرف (روز):</label>
-                            <input type="number" name="duration" className="duration" min="1" placeholder="مثلاً 10"
-                                value={formData.duration} onChange={handleChange} />
-                        </div>
-
-                        <div className="datetime-item">
-                            <label>تاریخ پایان (اختیاری):</label>
-                            <input type="date" name="endDate"
-                                value={formData.endDate} onChange={handleChange} />
-                        </div>
-                    </div>
-
-                    <div className="checkbox-group">
-                        <label>
-                            <input type="checkbox" name="daily" checked={formData.daily}
-                                onChange={handleChange} />
-                            مصرف روزانه
-                        </label>
-                        {formData.daily && (
-                            <input type="time" name="time" value={formData.time}
-                                onChange={handleChange} required />
-                        )}
-
-                        <label>
-                            <input type="checkbox" name="hourlyEnabled"
-                                checked={formData.hourlyEnabled}
-                                onChange={handleHourlyToggle} />
-                            مصرف ساعتی
-                        </label>
-                        {formData.hourlyEnabled && (
-                            <input type="number" name="hourlyInterval" className="hourlyInterval" min="1"
-                                placeholder="هر چند ساعت یکبار؟"
-                                onChange={handleChange} required />
-                        )}
-                    </div>
-
-                    <div className="form-actions">
-                        <button type="submit" className="save-btn">ذخیره</button>
-                        <button type="button" onClick={onClose} className="cancel-btn">لغو</button>
-                    </div>
-                </form>
-            </div>
+  return (
+    <div className="form-overlay" role="presentation" onMouseDown={onClose}>
+      <section className="form-container" role="dialog" aria-modal="true" aria-labelledby="med-form-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="modal-heading">
+          <div><span className="eyebrow">برنامه مصرف</span><h2 id="med-form-title">{editingMed ? 'ویرایش دارو' : 'افزودن داروی جدید'}</h2></div>
+          <button type="button" className="icon-button" onClick={onClose} aria-label="بستن">×</button>
         </div>
-    );
+
+        <form onSubmit={handleSubmit} className="add-form">
+          {error && <div className="form-alert" role="alert">{error}</div>}
+          <div className="field-group"><label htmlFor="med-name">نام دارو</label><input id="med-name" value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="مثلاً متفورمین" autoFocus /></div>
+          <div className="field-group"><label htmlFor="med-dose">دوز مصرف</label><input id="med-dose" value={form.dose} onChange={(event) => update('dose', event.target.value)} placeholder="مثلاً ۵۰۰ میلی‌گرم" /></div>
+
+          <JalaliDatePicker label="تاریخ شروع" value={form.startDate} onChange={(value) => update('startDate', value)} required minYear={1400} maxYear={1450} />
+          <div className="med-date-row">
+            <div className="field-group"><label htmlFor="duration">مدت مصرف (روز)</label><input id="duration" type="number" min="1" inputMode="numeric" value={form.duration} onChange={(event) => update('duration', event.target.value)} placeholder="اختیاری" /></div>
+            <JalaliDatePicker label="تاریخ پایان" value={form.endDate} onChange={(value) => update('endDate', value)} minYear={1400} maxYear={1450} />
+          </div>
+
+          <fieldset className="schedule-box">
+            <legend>زمان‌بندی مصرف</legend>
+            <div className="schedule-options">
+              <label className={form.schedule === 'daily' ? 'selected' : ''}><input type="radio" name="schedule" checked={form.schedule === 'daily'} onChange={() => update('schedule', 'daily')} /> روزانه</label>
+              <label className={form.schedule === 'hourly' ? 'selected' : ''}><input type="radio" name="schedule" checked={form.schedule === 'hourly'} onChange={() => update('schedule', 'hourly')} /> دوره‌ای</label>
+            </div>
+            {form.schedule === 'daily' ? (
+              <div className="field-group compact"><label htmlFor="med-time">ساعت یادآوری</label><input id="med-time" type="time" value={form.time} onChange={(event) => update('time', event.target.value)} /></div>
+            ) : (
+              <div className="field-group compact"><label htmlFor="med-hourly">فاصله مصرف (ساعت)</label><input id="med-hourly" type="number" min="1" max="24" value={form.hourly} onChange={(event) => update('hourly', event.target.value)} /></div>
+            )}
+          </fieldset>
+
+          <div className="field-group"><label htmlFor="doctor">نام پزشک <small>(اختیاری)</small></label><input id="doctor" value={form.doctor} onChange={(event) => update('doctor', event.target.value)} /></div>
+          <div className="field-group"><label htmlFor="notes">یادداشت <small>(اختیاری)</small></label><textarea id="notes" value={form.notes} onChange={(event) => update('notes', event.target.value)} placeholder="نکته‌ای درباره نحوه مصرف…" /></div>
+
+          <div className="form-actions">
+            <button type="button" className="secondary-button" onClick={onClose} disabled={saving}>انصراف</button>
+            <button type="submit" className="primary-button" disabled={saving}>{saving ? 'در حال ذخیره…' : 'ذخیره دارو'}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
 };

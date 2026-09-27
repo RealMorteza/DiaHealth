@@ -1,142 +1,105 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from 'react';
+import { FaBell, FaBellSlash, FaCheckCircle } from 'react-icons/fa';
+import { usePatient } from '../../contexts/usePatient.js';
+import { useMedications } from '../../contexts/useMedications.js';
+import {
+  getReminderRegistration,
+  remindersEnabled,
+  requestNotificationAccess,
+  setRemindersEnabled,
+} from '../../services/reminderService.js';
 import './Reminder.css';
-import { createClient } from "@supabase/supabase-js";
-import { usePatient } from "../../contexts/PatientContext";
 
-// تنظیمات Supabase
-const SUPABASE_URL = "https://ccqqtddvvltfqqfjgwdh.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjcXF0ZGR2dmx0ZnFxZmpnd2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjIzMzYsImV4cCI6MjA3MjYzODMzNn0.bZzVBTdkV-n0TGk0FK1nizfOi5nYMUhDFXLwJRpzQlk";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+function permissionLabel(permission) {
+  if (permission === 'granted') return 'دسترسی اعلان تأیید شده است';
+  if (permission === 'denied') return 'دسترسی اعلان در مرورگر مسدود شده است';
+  if (permission === 'unsupported') return 'این مرورگر از اعلان پشتیبانی نمی‌کند';
+  return 'در انتظار اجازه اعلان';
+}
 
 export const ReminderPage = () => {
-    const { patient } = usePatient();
-    const [medications, setMedications] = useState([]);
-    const [pushEnabled, setPushEnabled] = useState(
-        localStorage.getItem("pushEnabled") === "true"
-    );
+  const { patient } = usePatient();
+  const { medications } = useMedications();
+  const [permission, setPermission] = useState(() => ('Notification' in window ? Notification.permission : 'unsupported'));
+  const [enabled, setEnabled] = useState(() => remindersEnabled(patient?.id));
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
 
-    // این رفرنس دیگر برای جلوگیری از Closure در setInterval استفاده نمی‌شود،
-    // اما برای به‌روزرسانی در لحظه SW در صورت نیاز می‌تواند مفید باشد.
-    const medicationsRef = useRef(medications);
+  useEffect(() => {
+    if (!patient?.id) return;
+    setEnabled(remindersEnabled(patient.id));
+    getReminderRegistration().catch(() => setMessage('ثبت سرویس اعلان انجام نشد. صفحه را دوباره بارگذاری کنید.'));
+    requestNotificationAccess().then(({ permission: nextPermission }) => setPermission(nextPermission));
+  }, [patient?.id]);
 
-    // --- توابع کمکی ---
+  const enableReminders = async () => {
+    setBusy(true);
+    setMessage('');
+    const result = await requestNotificationAccess();
+    setPermission(result.permission);
+    if (result.permission !== 'granted') {
+      setMessage(result.permission === 'denied'
+        ? 'اعلان‌ها مسدود هستند. از تنظیمات سایت مرورگر، Notification را روی Allow قرار دهید.'
+        : 'برای فعال‌سازی یادآور، اجازه ارسال اعلان لازم است.');
+      setBusy(false);
+      return;
+    }
+    try {
+      await getReminderRegistration();
+      setRemindersEnabled(patient.id, true);
+      setEnabled(true);
+      setMessage('یادآوری داروها فعال شد. برنامه در زمان‌های ثبت‌شده اعلان می‌فرستد.');
+    } catch {
+      setMessage('فعال‌سازی اعلان انجام نشد. دوباره تلاش کنید.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
-    const fetchMedications = async () => {
-        if (!patient) return;
-        try {
-            const { data, error } = await supabase
-                .from("medication")
-                .select("*")
-                .eq("patient_id", patient.id)
-                .order("id", { ascending: true });
+  const disableReminders = () => {
+    setRemindersEnabled(patient.id, false);
+    setEnabled(false);
+    setMessage('یادآوری داروها غیرفعال شد.');
+  };
 
-            if (error) console.error("Supabase fetch error:", error);
-            else setMedications(data);
-        } catch (err) {
-            console.error("Fetch medications failed:", err);
-        }
-    };
+  const scheduledMedications = medications.filter((medication) => medication.daily || medication.hourly);
 
-    const requestPermission = async () => {
-        if ("Notification" in window && Notification.permission !== "granted") {
-            const permission = await Notification.requestPermission();
-            return permission === "granted";
-        }
-        return Notification.permission === "granted";
-    };
+  return (
+    <main className="app-page reminder-page">
+      <header className="page-heading">
+        <div><span className="eyebrow">مراقبت به‌موقع</span><h1>یادآوری داروها</h1><p>در ساعت ثبت‌شده، اعلان مصرف دارو دریافت کنید.</p></div>
+      </header>
 
-    /**
-     * دستور شروع یا آپدیت لیست داروها را به Service Worker ارسال می‌کند.
-     * @param {Array} currentMeds لیست داروهای جدید
-     */
-    const startSWInterval = (currentMeds) => {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({
-                command: 'START_REMINDER',
-                medications: currentMeds
-            });
-            console.log("Command 'START_REMINDER' and updated medications sent to Service Worker.");
-        } else {
-            console.warn("Service Worker controller not available. Cannot start background reminder.");
-        }
-    };
+      <section className={`reminder-hero ${enabled ? 'active' : ''}`}>
+        <div className="reminder-bell">{enabled ? <FaBell /> : <FaBellSlash />}</div>
+        <h2>{enabled ? 'اطلاع‌رسان دارو فعال است' : 'اطلاع‌رسان دارو غیرفعال است'}</h2>
+        <p>برای عملکرد یادآور، اجازه اعلان مرورگر باید فعال باشد و اپ در مرورگر یا حالت نصب‌شده باز بماند.</p>
+        <div className={`permission-pill permission-${permission}`}><FaCheckCircle /> {permissionLabel(permission)}</div>
+        {enabled ? (
+          <button className="secondary-button reminder-action" onClick={disableReminders}>غیرفعال‌کردن یادآورها</button>
+        ) : (
+          <button className="primary-button reminder-action" onClick={enableReminders} disabled={busy || permission === 'unsupported'}>
+            <FaBell /> {busy ? 'در حال فعال‌سازی…' : 'فعال‌سازی اطلاع‌رسان دارو'}
+          </button>
+        )}
+        {message && <p className="reminder-message" role="status">{message}</p>}
+      </section>
 
-    // --- useEffect ها ---
-
-    // ۱. ثبت SW و واکشی اولیه داروها
-    useEffect(() => {
-        // ثبت Service Worker
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("./sw.js")
-                .then(() => console.log("Service Worker registered!"))
-                .catch(err => console.error("SW registration failed:", err));
-        }
-
-        fetchMedications();
-    }, [patient]);
-
-    // ۲. به‌روزرسانی رفرنس داروها و ارسال به SW در صورت تغییر
-    useEffect(() => {
-        medicationsRef.current = medications;
-
-        // اگر یادآوری فعال است و لیست داروها آپدیت شده، SW را مطلع کن تا لوپ زمان‌بندی خود را با لیست جدید آپدیت کند.
-        if (pushEnabled) {
-            startSWInterval(medications);
-        }
-    }, [medications, pushEnabled]);
-
-    // --- Handler اصلی ---
-
-    const activateReminder = async () => {
-        const granted = await requestPermission();
-        if (granted) {
-            setPushEnabled(true);
-            localStorage.setItem("pushEnabled", "true");
-            alert("یادآوری‌ها فعال شد و در پس‌زمینه ادامه خواهد داشت.");
-
-            // ارسال دستور شروع به SW با لیست داروهای فعلی
-            startSWInterval(medications);
-
-        } else {
-            alert("مجوز ارسال نوتیفیکیشن توسط مرورگر داده نشد.");
-            setPushEnabled(false);
-            localStorage.setItem("pushEnabled", "false");
-        }
-    };
-
-    return (
-        <div className="main-container" style={{ padding: 20 }}>
-            <div className="header">
-                <h2>یادآوری داروها</h2>
-            </div>
-
-            <div className="medication-list">
-                <h3>داروهای ثبت شده:</h3>
-                <ul>
-                    {medications.length === 0 ? (
-                        <li>هیچ دارویی ثبت نشده است</li>
-                    ) : (
-                        medications.map(med => (
-                            <li key={med.id}>
-                                <strong>{med.name}</strong> - دوز: {med.dose}{" "}
-                                {med.daily && med.time ? `هر روز ساعت ${med.time}` :
-                                    med.hourly && med.hourlyInterval ? `هر ${med.hourlyInterval} ساعت` : ""}
-                            </li>
-                        ))
-                    )}
-                </ul>
-                <hr />
-            </div>
-
-            <div className="medication-setting">
-                <h3>تنظیمات:</h3>
-                <button onClick={activateReminder} disabled={pushEnabled}>
-                    {pushEnabled ? "یادآوری فعال ✅ (در پس‌زمینه)" : "فعال کردن یادآوری 🔔"}
-                </button>
-                {!pushEnabled && (
-                    <p style={{ color: 'red', marginTop: '10px' }}>برای فعال شدن یادآوری، یک بار دکمه را بزنید و مجوز مرورگر را تأیید کنید.</p>
-                )}
-            </div>
-        </div>
-    );
+      <section className="schedule-section">
+        <div className="section-heading"><h2>برنامه اعلان‌ها</h2><span>{scheduledMedications.length} دارو</span></div>
+        {scheduledMedications.length === 0 ? (
+          <div className="compact-empty">برای دریافت اعلان، ابتدا دارویی با ساعت مصرف ثبت کنید.</div>
+        ) : (
+          <ul className="schedule-list">
+            {scheduledMedications.map((medication) => (
+              <li key={medication.id}>
+                <div className="schedule-time">{medication.daily ? medication.time || '—' : `${medication.hourly}h`}</div>
+                <div><strong>{medication.name}</strong><span>{medication.daily ? 'هر روز' : `هر ${medication.hourly} ساعت`} · {medication.dose}</span></div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </main>
+  );
 };

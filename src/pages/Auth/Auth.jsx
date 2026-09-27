@@ -1,257 +1,209 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { usePatient } from '../../contexts/PatientContext.jsx';
-import moment from "moment-jalaali";
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { usePatient } from '../../contexts/usePatient.js';
+import { JalaliDatePicker } from '../../components/JalaliDatePicker/JalaliDatePicker.jsx';
+import { toJalaali } from 'jalaali-js';
+import logo from '../../assets/logo/diahealth.svg';
 import './Auth.css';
-import { useNavigate } from "react-router-dom";
 
 const VIRTUAL_EMAIL_DOMAIN = import.meta.env.VITE_VIRTUAL_EMAIL_DOMAIN || 'example.com';
+const CURRENT_JALALI_YEAR = toJalaali(new Date()).jy;
 
-const AuthPage = () => {
-    const { login, signup } = usePatient();
-    const navigate = useNavigate();
-    const todayJalali = moment().format("jYYYY/jMM/jDD");
+const initialForm = {
+  phone: '', password: '', name: '', family: '', gender: '', diabetesType: '',
+  allergies: '', weight: '', height: '', birthDate: '',
+};
 
-    const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
-    const [family, setFamily] = useState('');
-    const [gender, setGender] = useState('');
-    const [diabetesType, setDiabetesType] = useState('');
-    const [allergies, setAllergies] = useState('');
-    const [weight, setWeight] = useState('');
-    const [height, setHeight] = useState('');
-    const [isSignup, setIsSignup] = useState(false);
-    const birthDateInputRef = useRef(null);
-    const [errors, setErrors] = useState({});
+function normalizeDigits(value) {
+  return value
+    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
+}
 
-    // حالت waiting و پیام
-    const [waiting, setWaiting] = useState(false);
-    const [waitingMessage, setWaitingMessage] = useState('');
+function authErrorMessage(error, isSignup) {
+  const message = error?.message?.toLowerCase() || '';
+  if (message.includes('invalid login')) return 'شماره تلفن یا رمز عبور صحیح نیست.';
+  if (message.includes('already registered') || message.includes('already exists')) return 'با این شماره تلفن قبلاً حساب ساخته شده است.';
+  if (message.includes('password')) return 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
+  if (message.includes('network') || message.includes('fetch')) return 'ارتباط با سرور برقرار نشد. اینترنت خود را بررسی کنید.';
+  return isSignup ? 'ساخت حساب انجام نشد. کمی بعد دوباره تلاش کنید.' : 'ورود انجام نشد. کمی بعد دوباره تلاش کنید.';
+}
 
-    useEffect(() => {
-        if (birthDateInputRef.current) {
-            birthDateInputRef.current.value = todayJalali;
-        }
-    }, [todayJalali]);
+export default function AuthPage() {
+  const { login, signup } = usePatient();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isSignup, setIsSignup] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState('');
 
-    const handleInput = (e) => {
-        let value = e.target.value.replace(/[^0-9]/g, '');
-        let year = value.substring(0, 4);
-        let month = value.substring(4, 6);
-        let day = value.substring(6, 8);
+  const updateField = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined, auth: undefined }));
+  };
 
-        if (year.length === 4) {
-            let y = parseInt(year);
-            if (y < 1300) year = '1300';
-            if (y > 1404) year = '1404';
-        }
-        if (month.length === 2) {
-            let m = parseInt(month);
-            if (m < 1) month = '01';
-            if (m > 12) month = '12';
-        }
-        if (day.length === 2) {
-            let d = parseInt(day);
-            if (d < 1) day = '01';
-            if (d > 31) day = '31';
-        }
+  const validate = () => {
+    const nextErrors = {};
+    const phone = normalizeDigits(form.phone).replace(/\D/g, '');
+    if (!/^09\d{9}$/.test(phone)) nextErrors.phone = 'شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود.';
+    if (form.password.length < 6) nextErrors.password = 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
 
-        let formattedValue = year;
-        if (month) formattedValue += '/' + month;
-        if (day) formattedValue += '/' + day;
+    if (isSignup) {
+      if (!form.name.trim()) nextErrors.name = 'نام را وارد کنید.';
+      if (!form.family.trim()) nextErrors.family = 'نام خانوادگی را وارد کنید.';
+      if (!form.gender) nextErrors.gender = 'جنسیت را انتخاب کنید.';
+      if (!form.diabetesType) nextErrors.diabetesType = 'نوع دیابت را انتخاب کنید.';
+      if (!form.birthDate) nextErrors.birthDate = 'تاریخ تولد را انتخاب کنید.';
+      else if (new Date(`${form.birthDate}T12:00:00`) >= new Date()) nextErrors.birthDate = 'تاریخ تولد باید پیش از امروز باشد.';
+      const weight = Number(form.weight);
+      const height = Number(form.height);
+      if (!weight || weight < 20 || weight > 350) nextErrors.weight = 'وزن معتبر وارد کنید.';
+      if (!height || height < 80 || height > 250) nextErrors.height = 'قد معتبر وارد کنید.';
+    }
+    return { nextErrors, phone };
+  };
 
-        e.target.value = formattedValue;
-    };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const { nextErrors, phone } = validate();
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
+      return;
+    }
 
-    const handleKeyDown = (e) => {
-        const input = e.target;
-        const { selectionStart } = input;
-        if (e.key === 'Backspace' && (selectionStart === 5 || selectionStart === 8)) {
-            e.preventDefault();
-            input.setSelectionRange(selectionStart - 1, selectionStart - 1);
-            return;
-        }
-        if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
-            e.preventDefault();
-        }
-    };
+    setSubmitting(true);
+    setStatus(isSignup ? 'در حال ساخت حساب…' : 'در حال ورود…');
+    const email = `${phone}@${VIRTUAL_EMAIL_DOMAIN}`.toLowerCase();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        let newErrors = {};
-        setErrors({});
-        const normalizedPhone = phone.replace(/[^0-9]/g, '');
+    try {
+      const result = isSignup
+        ? await signup(email, form.password, {
+          name: form.name.trim(),
+          family: form.family.trim(),
+          gender: form.gender,
+          birth_date: form.birthDate,
+          diabetes_type: form.diabetesType,
+          phone,
+          allergies: form.allergies.trim() || null,
+          weight: Number(form.weight),
+          height: Number(form.height),
+        })
+        : await login(email, form.password);
 
-        // اعتبارسنجی فیلدها
-        if (!phone) newErrors.phone = 'شماره تلفن الزامی است.';
-        else if (!/^09\d{9}$/.test(phone)) newErrors.phone = 'شماره تلفن باید 11 رقم باشد و با 09 شروع شود.';
-        if (!password) newErrors.password = 'رمز عبور الزامی است.';
+      if (result.error) {
+        setErrors({ auth: authErrorMessage(result.error, isSignup) });
+        setStatus('');
+        return;
+      }
 
-        if (isSignup) {
-            if (!name) newErrors.name = 'نام الزامی است.';
-            if (!family) newErrors.family = 'نام خانوادگی الزامی است.';
-            if (!gender) newErrors.gender = 'جنسیت الزامی است.';
-            if (!diabetesType) newErrors.diabetesType = 'نوع دیابت الزامی است.';
-            if (!weight) newErrors.weight = 'وزن الزامی است.';
-            if (!height) newErrors.height = 'قد الزامی است.';
+      setStatus('خوش آمدید!');
+      const destination = location.state?.from?.pathname || (isSignup ? '/profile' : '/');
+      navigate(destination, { replace: true });
+    } catch {
+      setErrors({ auth: 'خطای پیش‌بینی‌نشده‌ای رخ داد. دوباره تلاش کنید.' });
+      setStatus('');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-            const dateValue = birthDateInputRef.current.value;
-            const dateMoment = moment(dateValue, "jYYYY/jMM/jDD");
-            if (!dateMoment.isValid() || dateValue.length !== 10) {
-                newErrors.birth_date = 'فرمت تاریخ درست نیست. YYYY/MM/DD';
-            } else {
-                const year = dateMoment.jYear();
-                const month = dateMoment.jMonth() + 1;
-                const day = dateMoment.jDate();
-                const daysInMonth = moment.jDaysInMonth(year, month - 1);
-                if (year < 1300 || year > 1404) newErrors.birth_date = 'سال باید بین 1300 تا 1404 باشد.';
-                else if (month < 1 || month > 12) newErrors.birth_date = 'ماه باید بین 1 تا 12 باشد.';
-                else if (day < 1 || day > daysInMonth) newErrors.birth_date = `روز وارد شده معتبر نیست. این ماه ${daysInMonth} روز دارد.`;
-            }
-        }
+  const toggleMode = () => {
+    setIsSignup((current) => !current);
+    setErrors({});
+    setStatus('');
+  };
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
+  return (
+    <main className={`auth-container ${isSignup ? 'signup-mode' : ''}`}>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <header className="auth-heading">
+          <img className="auth-logo" src={logo} alt="DiaHealth" />
+          <h1>{isSignup ? 'ساخت حساب DiaHealth' : 'ورود به DiaHealth'}</h1>
+          <p>{isSignup ? 'اطلاعات سلامت خود را وارد کنید تا همراه شما باشیم.' : 'برای مدیریت داروها وارد حساب خود شوید.'}</p>
+        </header>
 
-        const virtualEmail = `${normalizedPhone}@${VIRTUAL_EMAIL_DOMAIN}`.toLowerCase();
-        const birthDateGregorian = isSignup ? moment(birthDateInputRef.current.value, "jYYYY/jMM/jDD").format("YYYY-MM-DD") : null;
+        {errors.auth && <div className="form-alert" role="alert">{errors.auth}</div>}
 
-        try {
-            setWaiting(true);
-            setWaitingMessage('لطفاً صبر کنید...');
+        <div className="auth-fields">
+          {isSignup && (
+            <>
+              <div className="field-row">
+                <div className="field-group">
+                  <label htmlFor="name">نام</label>
+                  <input id="name" autoComplete="given-name" value={form.name} onChange={(event) => updateField('name', event.target.value)} />
+                  {errors.name && <span className="field-error">{errors.name}</span>}
+                </div>
+                <div className="field-group">
+                  <label htmlFor="family">نام خانوادگی</label>
+                  <input id="family" autoComplete="family-name" value={form.family} onChange={(event) => updateField('family', event.target.value)} />
+                  {errors.family && <span className="field-error">{errors.family}</span>}
+                </div>
+              </div>
 
-            if (isSignup) {
-                const { error: authError, data } = await signup(virtualEmail, password, {
-                    name, family, gender,
-                    birth_date: birthDateGregorian,
-                    diabetes_type: diabetesType,
-                    phone,
-                    allergies,
-                    weight,
-                    height
-                });
+              <div className="field-group">
+                <JalaliDatePicker label="تاریخ تولد" value={form.birthDate} onChange={(value) => updateField('birthDate', value)} required minYear={1300} maxYear={CURRENT_JALALI_YEAR} />
+                {errors.birthDate && <span className="field-error">{errors.birthDate}</span>}
+              </div>
 
-                if (authError) {
-                    setWaitingMessage('اطلاعات وارد شده درست نیست.');
-                    setTimeout(() => setWaiting(false), 2000);
-                    return;
-                }
+              <div className="field-row">
+                <div className="field-group">
+                  <label htmlFor="gender">جنسیت</label>
+                  <select id="gender" value={form.gender} onChange={(event) => updateField('gender', event.target.value)}>
+                    <option value="">انتخاب کنید</option><option value="male">مرد</option><option value="female">زن</option><option value="other">سایر</option>
+                  </select>
+                  {errors.gender && <span className="field-error">{errors.gender}</span>}
+                </div>
+                <div className="field-group">
+                  <label htmlFor="diabetesType">نوع دیابت</label>
+                  <select id="diabetesType" value={form.diabetesType} onChange={(event) => updateField('diabetesType', event.target.value)}>
+                    <option value="">انتخاب کنید</option><option value="1">نوع ۱</option><option value="2">نوع ۲</option>
+                  </select>
+                  {errors.diabetesType && <span className="field-error">{errors.diabetesType}</span>}
+                </div>
+              </div>
 
-                setWaitingMessage('خوش آمدید!');
-                setTimeout(() => {
-                    setWaiting(false);
-                    navigate("/profile");
-                }, 1500);
+              <div className="field-row">
+                <div className="field-group">
+                  <label htmlFor="weight">وزن (کیلوگرم)</label>
+                  <input id="weight" type="number" inputMode="decimal" min="20" max="350" value={form.weight} onChange={(event) => updateField('weight', event.target.value)} />
+                  {errors.weight && <span className="field-error">{errors.weight}</span>}
+                </div>
+                <div className="field-group">
+                  <label htmlFor="height">قد (سانتی‌متر)</label>
+                  <input id="height" type="number" inputMode="numeric" min="80" max="250" value={form.height} onChange={(event) => updateField('height', event.target.value)} />
+                  {errors.height && <span className="field-error">{errors.height}</span>}
+                </div>
+              </div>
 
-            } else {
-                const { error: loginError } = await login(virtualEmail, password);
-                if (loginError) {
-                    setWaitingMessage('اطلاعات وارد شده درست نیست.');
-                    setTimeout(() => setWaiting(false), 2000);
-                    return;
-                }
+              <div className="field-group">
+                <label htmlFor="allergies">حساسیت‌ها <small>(اختیاری)</small></label>
+                <input id="allergies" value={form.allergies} onChange={(event) => updateField('allergies', event.target.value)} placeholder="مثلاً پنی‌سیلین" />
+              </div>
+            </>
+          )}
 
-                setWaitingMessage('خوش آمدید!');
-                setTimeout(() => {
-                    setWaiting(false);
-                    navigate("/profile");
-                }, 1500);
-            }
+          <div className="field-group">
+            <label htmlFor="phone">شماره موبایل</label>
+            <input id="phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength="11" dir="ltr" placeholder="09123456789" value={form.phone} onChange={(event) => updateField('phone', normalizeDigits(event.target.value).replace(/\D/g, ''))} />
+            {errors.phone && <span className="field-error">{errors.phone}</span>}
+          </div>
 
-        } catch (err) {
-            setWaitingMessage('ضمن پوزش، ورود/ثبت نام ناموفق بود. بعد از 2 دقیقه دوباره اقدام کنید.');
-            setTimeout(() => setWaiting(false), 5000);
-        }
-    };
-    function CheckForm() {
+          <div className="field-group">
+            <label htmlFor="password">رمز عبور</label>
+            <input id="password" type="password" autoComplete={isSignup ? 'new-password' : 'current-password'} value={form.password} onChange={(event) => updateField('password', event.target.value)} placeholder="حداقل ۶ کاراکتر" />
+            {errors.password && <span className="field-error">{errors.password}</span>}
+          </div>
+        </div>
 
-        const handleSubmit = (e) => {
-            e.preventDefault();
-
-            if (!name || !tel) {
-                alert('همه فیلدها رو پر کن');
-                return;
-            }
-
-            // submit logic
-        }; }
-        CheckForm();
-
-        return (
-            <div className="auth-container">
-
-                <form className="auth-form" onSubmit={handleSubmit}>
-                    <img className='auth-logo' src='src\assets\logo\diahealth.svg'></img>
-                    <h2>{isSignup ? 'ثبت نام' : 'ورود'}</h2>
-                    <hr></hr>
-                    {errors.auth && <div className="error">{errors.auth}</div>}
-
-                    <input type="tel" className='tel-signup' placeholder="شماره تلفن" value={phone} onChange={e => setPhone(e.target.value)} />
-                    {errors.phone && <div className="error">{errors.phone}</div>}
-
-                    {isSignup && (
-                        <>
-                            <input className='name' placeholder="نام" value={name} onChange={e => setName(e.target.value)} />
-                            {errors.name && <div className="error">{errors.name}</div>}
-
-                            <input className='family-name' placeholder="نام خانوادگی" value={family} onChange={e => setFamily(e.target.value)} />
-                            {errors.family && <div className="error">{errors.family}</div>}
-
-                            <select value={gender} onChange={e => setGender(e.target.value)}>
-                                <option value="">جنسیت</option>
-                                <option value="male">مرد</option>
-                                <option value="female">زن</option>
-                                <option value="other">سایر</option>
-                            </select>
-                            {errors.gender && <div className="error">{errors.gender}</div>}
-
-                            <input
-                                ref={birthDateInputRef}
-                                type="text"
-                                placeholder="تاریخ تولد (مثال: 1370/01/15)"
-                                onInput={handleInput}
-                                onKeyDown={handleKeyDown}
-                                maxLength={10}
-                            />
-                            {errors.birth_date && <div className="error">{errors.birth_date}</div>}
-
-                            <select value={diabetesType} onChange={e => setDiabetesType(e.target.value)}>
-                                <option value="">نوع دیابت</option>
-                                <option value="1">نوع 1</option>
-                                <option value="2">نوع 2</option>
-                            </select>
-                            {errors.diabetesType && <div className="error">{errors.diabetesType}</div>}
-
-                            <input placeholder="آلرژی‌ها (اختیاری)" value={allergies} onChange={e => setAllergies(e.target.value)} />
-                            <input type="number" placeholder="وزن (kg)" value={weight} onChange={e => setWeight(e.target.value)} />
-                            {errors.weight && <div className="error">{errors.weight}</div>}
-                            <input type="number" placeholder="قد (cm)" value={height} onChange={e => setHeight(e.target.value)} />
-                            {errors.height && <div className="error">{errors.height}</div>}
-                        </>
-                    )}
-
-                    <input placeholder="رمز عبور" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-                    {errors.password && <div className="error">{errors.password}</div>}
-
-                    <button type="submit" className="submit-btn">{isSignup ? 'ثبت نام' : 'ورود'}</button>
-                    <button type="button" className="toggle-btn" onClick={() => setIsSignup(!isSignup)}>
-                        {isSignup ? 'قبلا ثبت نام کرده‌ام' : 'ساخت حساب جدید'}
-                    </button>
-                </form>
-
-                {waiting && (
-                    <div className="waiting-modal">
-                        <div className="waiting-content">
-                            <div className="spinner"></div>
-                            <p>{waitingMessage}</p>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-
-    };
-
-    export default AuthPage;
+        <button type="submit" className="primary-button auth-submit" disabled={submitting}>
+          {submitting ? status : (isSignup ? 'ساخت حساب' : 'ورود')}
+        </button>
+        <button type="button" className="text-button" onClick={toggleMode} disabled={submitting}>
+          {isSignup ? 'حساب دارید؟ وارد شوید' : 'حساب ندارید؟ حساب جدید بسازید'}
+        </button>
+      </form>
+    </main>
+  );
+}

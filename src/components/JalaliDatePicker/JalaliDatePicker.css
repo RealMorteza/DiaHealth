@@ -1,0 +1,25 @@
+.jalali-picker { width: 100%; }
+.field-label { display: block; margin-bottom: 7px; color: var(--text-muted); font-size: .84rem; }
+.field-label span { color: var(--danger); }
+.jalali-picker-trigger {
+  width: 100%; min-height: 48px; padding: 0 13px; display: flex; align-items: center;
+  justify-content: space-between; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 12px; font: inherit; cursor: pointer;
+}
+.jalali-picker-trigger:focus-visible { outline: 3px solid var(--primary-soft); border-color: var(--primary); }
+.jalali-picker-backdrop {
+  position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center;
+  padding: 18px; background: rgba(16, 37, 63, .48); backdrop-filter: blur(3px);
+}
+.jalali-calendar { width: min(360px, 100%); padding: 18px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-lg); }
+.jalali-calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.jalali-calendar-header > button { width: 38px; height: 38px; border: 0; border-radius: 10px; color: var(--primary-dark); background: var(--primary-soft); font-size: 1.7rem; cursor: pointer; }
+.jalali-calendar-title { display: flex; gap: 6px; }
+.jalali-calendar-title select { border: 1px solid var(--border); border-radius: 9px; padding: 7px; background: #fff; color: var(--text); font: inherit; }
+.jalali-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; direction: rtl; }
+.jalali-weekdays { margin-bottom: 6px; color: var(--text-muted); font-size: .78rem; text-align: center; }
+.jalali-calendar-grid button { aspect-ratio: 1; border: 0; border-radius: 10px; background: transparent; color: var(--text); font: inherit; cursor: pointer; }
+.jalali-calendar-grid button:hover { background: var(--primary-soft); }
+.jalali-calendar-grid button.is-today { box-shadow: inset 0 0 0 1px var(--primary); }
+.jalali-calendar-grid button.is-selected { background: var(--primary); color: #fff; box-shadow: none; }
+.jalali-calendar-close { width: 100%; margin-top: 14px; padding: 9px; border: 0; border-radius: 10px; background: var(--surface-muted); color: var(--text-muted); font: inherit; cursor: pointer; }

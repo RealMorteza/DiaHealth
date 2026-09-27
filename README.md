@@ -1,12 +1,36 @@
-# React + Vite
+# DiaHealth
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+وب‌اپ فارسی مدیریت دارو و سلامت بیماران دیابتی، ساخته‌شده با React، Vite و Supabase.
 
-Currently, two official plugins are available:
+## امکانات
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ورود و ثبت‌نام با شماره موبایل (ایمیل مجازی در Supabase Auth)
+- پروفایل سلامت و نمایش BMI، BMR و وزن ایده‌آل
+- ثبت و ویرایش دارو با تاریخ‌نگار شمسی
+- یادآوری مرورگری زمان مصرف دارو
+- ثبت ماهانه قند خون و نمودار روند سالانه
+- رابط موبایل‌محور و PWA قابل استقرار روی GitHub Pages
 
-## Expanding the ESLint configuration
+## اجرا
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+کنترل کیفیت و ساخت نسخه تولیدی:
+
+```bash
+npm run lint
+npm run build
+```
+
+## استقرار
+
+مقدار `base` در `vite.config.js` برای مخزن `/DiaHealth/` تنظیم شده است. خروجی `npm run build` در پوشه `dist` ساخته می‌شود و با `npm run deploy` روی GitHub Pages منتشر می‌شود.
+
+داده‌های حساب، بیمار و دارو در Supabase ذخیره می‌شوند. سوابق قند خون فعلاً به‌صورت محلی و مجزا برای هر بیمار در مرورگر نگهداری می‌شوند تا بدون افزودن جدول جدید به دیتابیس قابل استفاده باشند.
+
+## محدودیت اعلان مرورگر
+
+یادآور ساده مرورگری هنگامی زمان را بررسی می‌کند که وب‌اپ باز یا در حالت نصب‌شده فعال باشد. ارسال اعلان تضمینی در زمانی که برنامه کاملاً بسته است به backend زمان‌بندی‌شده یا Push Service نیاز دارد.

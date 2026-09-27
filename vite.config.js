@@ -7,22 +7,24 @@ export default defineConfig({
     react(), // ❗ مهم
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt'],
+      includeAssets: ['diahealth-icon.svg'],
+      workbox: {
+        importScripts: ['notification-sw.js']
+      },
       manifest: {
         name: 'DiaHealth',
         short_name: 'DiaHealth',
         description: 'مدیریت دارو و یادآوری بیماران دیابتی',
-        theme_color: '#ffffff',
+        lang: 'fa',
+        dir: 'rtl',
+        background_color: '#f2f6fa',
+        theme_color: '#4a90e2',
         icons: [
           {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            src: 'diahealth-icon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
           }
         ]
       }

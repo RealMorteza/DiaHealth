@@ -1,142 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import { usePatient } from '../../contexts/PatientContext.jsx';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaRulerVertical, FaSignOutAlt, FaWeight, FaWeightHanging } from 'react-icons/fa';
 import moment from 'moment-jalaali';
+import { usePatient } from '../../contexts/usePatient.js';
+import { BloodSugar } from './BloodSugar.jsx';
+import userIcon from '../../assets/icon/user-new.png';
 import './Profile.css';
-import user_icon from '../../assets/icon/user-new.png';
 
-const VAPID_PUBLIC_KEY = "BDjkM0uEY-en4Z6DWZjhqLsPZnCjz6vuIdf_6PtioqdsyfDWhNWiD2Khi_pQIHtLFe6yCrNcgUZN6gyUbekY4KY";
+const genderMap = { male: 'مرد', female: 'زن', other: 'سایر' };
 
-const genderMap = {
-    male: 'مرد',
-    female: 'زن',
-    other: 'سایر'
-};
+function calculateHealthMetrics(patient) {
+  const height = Number(patient.height);
+  const weight = Number(patient.weight);
+  const age = moment().diff(moment(patient.birth_date, 'YYYY-MM-DD'), 'years');
+  const heightM = height / 100;
+  const bmiNumber = heightM > 0 ? weight / (heightM * heightM) : 0;
+  let category = 'نامشخص';
+  if (bmiNumber > 0 && bmiNumber < 18.5) category = 'کم‌وزن';
+  else if (bmiNumber < 25) category = 'نرمال';
+  else if (bmiNumber < 30) category = 'اضافه‌وزن';
+  else if (bmiNumber) category = 'چاق';
 
-// توابع محاسبه شاخص‌ها
-function calculateBMI(patient) {
-    const heightM = patient.height / 100;
-    const bmi = patient.weight / (heightM * heightM);
-    let category = "";
-    if (bmi < 18.5) category = "کم‌وزن";
-    else if (bmi < 24.9) category = "نرمال";
-    else if (bmi < 29.9) category = "اضافه‌وزن";
-    else category = "چاق";
-    return { bmi: bmi.toFixed(1), category };
+  const bmr = patient.gender === 'female'
+    ? 10 * weight + 6.25 * height - 5 * age - 161
+    : 10 * weight + 6.25 * height - 5 * age + 5;
+  const idealWeight = patient.gender === 'female'
+    ? height - 100 - (height - 150) / 2.5
+    : height - 100 - (height - 150) / 4;
+
+  return {
+    bmi: bmiNumber ? bmiNumber.toFixed(1) : '—',
+    category,
+    bmr: Number.isFinite(bmr) ? Math.max(0, bmr).toFixed(0) : '—',
+    idealWeight: Number.isFinite(idealWeight) ? idealWeight.toFixed(0) : '—',
+  };
 }
 
-function calculateBMR(patient) {
-    let BMR;
-    const age = patient.age || moment().diff(moment(patient.birth_date, "YYYY-MM-DD"), "years");
-    const height = patient.height;
-    const weight = patient.weight;
+export default function ProfilePage() {
+  const { patient, logout } = usePatient();
+  const navigate = useNavigate();
+  const [logoutError, setLogoutError] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
 
-    if (patient.gender === "male") BMR = 10 * weight + 6.25 * height - 5 * age + 5;
-    else if (patient.gender === "female") BMR = 10 * weight + 6.25 * height - 5 * age - 161;
-    return { BMR: BMR.toFixed(0) };
-}
+  if (!patient) return null;
+  const metrics = calculateHealthMetrics(patient);
+  const birthDate = patient.birth_date ? moment(patient.birth_date, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : '—';
 
-function calculateIdealWeight(patient) {
-    const height = patient.height;
-    let IW;
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const { error } = await logout();
+      if (error) throw error;
+      navigate('/login', { replace: true });
+    } catch {
+      setLogoutError('خروج از حساب انجام نشد. دوباره تلاش کنید.');
+      setLoggingOut(false);
+    }
+  };
 
-    if (patient.gender === "male") IW = height - 100 - (height - 150) / 4;
-    else if (patient.gender === "female") IW = height - 100 - (height - 150) / 2.5;
-    else IW = height - 100 - (height - 150) / 4;
-    return { IW: IW.toFixed(0) };
-}
+  return (
+    <main className="app-page profile-page">
+      <section className="profile-summary">
+        <img className="profile-avatar" src={userIcon} alt="تصویر پروفایل" />
+        <div><span className="eyebrow">حساب کاربری</span><h1>{patient.name} {patient.family}</h1><p>دیابت نوع {patient.diabetes_type || '—'}</p></div>
+      </section>
 
-// تبدیل کلید Base64 به Uint8Array
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-    const rawData = atob(base64);
-    return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
-}
+      <section className="profile-card">
+        <div className="section-heading"><h2>اطلاعات شخصی</h2></div>
+        <dl className="profile-details">
+          <div><dt>شماره تماس</dt><dd dir="ltr">{patient.phone || '—'}</dd></div>
+          <div><dt>تاریخ تولد</dt><dd>{birthDate}</dd></div>
+          <div><dt>جنسیت</dt><dd>{genderMap[patient.gender] || '—'}</dd></div>
+          <div><dt>حساسیت‌ها</dt><dd>{patient.allergies || 'موردی ثبت نشده'}</dd></div>
+        </dl>
+      </section>
 
-const ProfilePage = () => {
-    const { patient, medications, logout } = usePatient();
-    const [pushEnabled, setPushEnabled] = useState(false);
-
-    // بررسی قبلی فعال بودن push
-    useEffect(() => {
-        if (!("serviceWorker" in navigator)) return;
-
-        navigator.serviceWorker.ready.then(async (reg) => {
-            const sub = await reg.pushManager.getSubscription();
-            if (sub) setPushEnabled(true);
-        });
-    }, []);
-
-    if (!patient) return <p style={{ textAlign: 'center', marginTop: '50px' }}>لطفا وارد شوید</p>;
-
-    const birthDateJalali = patient.birth_date
-        ? moment(patient.birth_date, "YYYY-MM-DD").format("jYYYY/jMM/jDD")
-        : '-';
-
-    const { bmi, category } = calculateBMI(patient);
-    const { BMR } = calculateBMR(patient);
-    const { IW } = calculateIdealWeight(patient);
-
-    const registerPush = async () => {
-        if (!("serviceWorker" in navigator)) return alert("Service Worker پشتیبانی نمی‌شود!");
-
-        try {
-            const reg = await navigator.serviceWorker.register("/sw.js");
-            console.log("Service Worker registered", reg);
-
-            const permission = await Notification.requestPermission();
-            if (permission !== "granted") return alert("دسترسی نوتیفیکیشن داده نشد!");
-
-            const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-            });
-
-            console.log("Push subscription:", sub);
-
-            await fetch("http://localhost:5000/subscribe", {
-                method: "POST",
-                body: JSON.stringify(sub),
-                headers: { "Content-Type": "application/json" }
-            });
-
-            setPushEnabled(true);
-            alert("یادآوری‌ها فعال شدند!");
-        } catch (err) {
-            console.error("Error registering push notification", err);
-            alert("خطا در فعال کردن یادآوری‌ها");
-        }
-    };
-
-    return (
-        <div className="profile-container">
-            <div className="profile-card">
-                <img className='user_icon' src={user_icon} />
-                <h1>پروفایل</h1>
-                <hr/>
-                <p><strong>نام:</strong> {patient.name}</p>
-                <p><strong>نام خانوادگی:</strong> {patient.family}</p>
-                <p><strong>جنسیت:</strong> {genderMap[patient.gender] || '-'}</p>
-                <p><strong>تاریخ تولد:</strong> {birthDateJalali}</p>
-                <p><strong>نوع دیابت:</strong> {patient.diabetes_type}</p>
-                <p><strong>شماره تماس:</strong> {patient.phone}</p>
-                <p><strong>وزن:</strong> {patient.weight} کیلوگرم</p>
-                <p><strong>قد:</strong> {patient.height} سانتی‌متر</p>
-                {patient.allergies && <p><strong>آلرژی‌ها:</strong> {patient.allergies}</p>}
-                <hr />
-
-                <div className='body-index'>
-                    <h4>شاخص‌های بدنی شما 📇</h4>
-                    <p className='bmi'><strong>📌 BMI (شاخص توده بدنی):</strong> {bmi} ({category})</p>
-                    <p className='bmr'><strong>📌 BMR (متاسبولیسم پایه):</strong> {BMR} Cal</p>
-                    <p className='IW'><strong>📌 Ideal Weight (وزن ایده آل):</strong> {IW} کیلوگرم</p>
-                </div>
-                <hr/>
-                
-                <button className="logout-btn" onClick={logout}>خروج ◀</button>
-            </div>
+      <section className="metrics-card">
+        <div className="section-heading"><h2>شاخص‌های بدن</h2><span>برآورد فعلی</span></div>
+        <div className="metrics-grid">
+          <article><FaWeight /><strong>{metrics.bmi}</strong><span>BMI · {metrics.category}</span></article>
+          <article><FaRulerVertical /><strong>{metrics.bmr}</strong><span>سوخت‌وساز پایه</span></article>
+          <article><FaWeightHanging /><strong>{metrics.idealWeight}</strong><span>وزن ایده‌آل (kg)</span></article>
         </div>
-    );
-};
+      </section>
 
-export default ProfilePage;
+      <BloodSugar patientId={patient.id} />
+
+      {logoutError && <div className="form-alert" role="alert">{logoutError}</div>}
+      <button className="logout-button" onClick={handleLogout} disabled={loggingOut}><FaSignOutAlt /> {loggingOut ? 'در حال خروج…' : 'خروج از حساب'}</button>
+    </main>
+  );
+}

@@ -1,145 +1,30 @@
-/* کل صفحه مرکز چین شده */
 .auth-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to bottom right, #6a11cb, #2575fc);
-    font-family: 'iransans';
-    height: 100%;
-    padding: 25px;
-    min-height: 100vh;
+  min-height: 100dvh; display: grid; place-items: center; padding: 22px 18px;
+  background: linear-gradient(145deg, #eaf8f8 0%, #edf4ff 48%, #dcecff 100%);
 }
-
-.auth-logo {
-    width: 180px;
-    margin: 0 auto;
-}
-
-
-/* فرم */
+.auth-container.signup-mode { place-items: start center; }
 .auth-form {
-    background: white;
-    padding: 40px 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    width: 350px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  width: 100%; max-width: 420px; padding: 26px 22px; border: 1px solid rgba(74, 144, 226, .14);
+  border-radius: 24px; background: rgba(255, 255, 255, .96); box-shadow: var(--shadow-lg);
 }
-
-/* تیتر فرم */
-.auth-form h2 {
-    text-align: center;
-    color: #333;
+.auth-heading { text-align: center; margin-bottom: 22px; }
+.auth-logo { display: block; width: 164px; max-height: 76px; margin: 0 auto 8px; object-fit: contain; }
+.auth-heading h1 { color: var(--text); font-size: 1.28rem; margin-bottom: 6px; }
+.auth-heading p { color: var(--text-muted); font-size: .84rem; line-height: 1.8; }
+.auth-fields { display: flex; flex-direction: column; gap: 14px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-group { min-width: 0; }
+.field-group > label { display: block; margin-bottom: 7px; color: var(--text-muted); font-size: .82rem; }
+.field-group label small { color: var(--text-light); }
+.field-group input, .field-group select {
+  width: 100%; min-height: 48px; padding: 0 13px; border: 1px solid var(--border);
+  border-radius: 12px; background: #fff; color: var(--text); font: inherit; outline: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-
-/* فیلدهای فرم */
-.auth-form input {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    outline: none;
-    transition: 0.3s;
-    font-family: 'iransans';
-}
-
-.tel-signup::placeholder {
-    text-align: right;
-}
-
-.auth-form button {
-    font-family: 'iransans';
-}
-
-.auth-form select {
-    width: 100%;
-    height: 40px;
-    font-family: 'iransans';
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
-
-.auth-form input:focus {
-    border-color: #2575fc;
-    box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
-}
-
-/* دکمه ورود/ثبت نام */
-.submit-btn {
-    padding: 12px;
-    background: #2575fc;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.submit-btn:hover {
-    background: #1a5edb;
-}
-
-/* دکمه تغییر حالت فرم */
-.toggle-btn {
-    padding: 10px;
-    background: #e0e0e0;
-    color: #333;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.toggle-btn:hover {
-    background: #d5d5d5;
-}
-
-.waiting-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.waiting-content {
-    background-color: #fff;
-    padding: 25px 40px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    font-size: 18px;
-    color: #333;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.spinner {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #1890ff;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
+.field-group input:focus, .field-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.field-error { display: block; margin-top: 5px; color: var(--danger); font-size: .74rem; line-height: 1.55; }
+.form-alert { margin-bottom: 15px; padding: 11px 13px; border-radius: 12px; background: #fff0f0; color: #a63c3c; font-size: .82rem; line-height: 1.7; }
+.auth-submit { width: 100%; margin-top: 20px; }
+.text-button { display: block; margin: 12px auto 0; padding: 8px; border: 0; background: transparent; color: var(--primary-dark); font: inherit; font-size: .84rem; cursor: pointer; }
+.text-button:disabled { opacity: .55; cursor: wait; }
+@media (max-width: 360px) { .field-row { grid-template-columns: 1fr; } .auth-form { padding-inline: 17px; } }

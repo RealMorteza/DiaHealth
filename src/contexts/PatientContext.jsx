@@ -1,143 +1,109 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseclient.js';
-
-const PatientContext = createContext();
-
-export const usePatient = () => useContext(PatientContext);
+import { PatientContext } from './patient-context.js';
 
 export const PatientProvider = ({ children }) => {
-    const [patient, setPatient] = useState(null);
-    const [medications, setMedications] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const [patient, setPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    // واکشی session و patient هنگام لود
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data }) => {
-            if (data.session) {
-                fetchPatient(data.session.user.id);
-            } else {
-                setLoading(false);
-            }
-        });
-    }, []);
+  const fetchPatient = useCallback(async (authId) => {
+    if (!authId) {
+      setPatient(null);
+      setLoading(false);
+      return { data: null, error: null };
+    }
 
-    // واکشی بیمار و داروهایش
-    const fetchPatient = async (authId) => {
-        const { data, error } = await supabase
-            .from("patient")
-            .select("*")
-            .eq("auth_id", authId)
-            .single();
+    const result = await supabase
+      .from('patient')
+      .select('*')
+      .eq('auth_id', authId)
+      .maybeSingle();
 
-        if (!error && data) {
-            setPatient(data);
-            fetchMedications(data.id); // واکشی داروهای بیمار
-        } else {
-            setPatient(null);
-            setMedications([]);
-        }
-        setLoading(false);
-    };
+    setPatient(result.error ? null : result.data);
+    setLoading(false);
+    return result;
+  }, []);
 
-    // واکشی داروها برای بیمار جاری
-    const fetchMedications = async (patientId) => {
-        const { data, error } = await supabase
-            .from('medications')
-            .select('*')
-            .eq('patient_id', patientId)
-            .order('name', { ascending: true });
+  useEffect(() => {
+    let mounted = true;
 
-        if (!error) setMedications(data || []);
-        else setMedications([]);
-    };
-
-    // افزودن دارو جدید
-    const addMedication = async (medicationData) => {
-        if (!patient) return { error: new Error("No patient logged in") };
-        const { data, error } = await supabase
-            .from('medications')
-            .insert([{ ...medicationData, patient_id: patient.id }])
-            .select()
-            .single();
-
-        if (!error) fetchMedications(patient.id); // بروز رسانی لیست داروها
-        return { data, error };
-    };
-
-    // ویرایش دارو
-    const updateMedication = async (medicationId, updatedData) => {
-        if (!patient) return { error: new Error("No patient logged in") };
-        const { data, error } = await supabase
-            .from('medications')
-            .update(updatedData)
-            .eq('id', medicationId)
-            .eq('patient_id', patient.id)
-            .select()
-            .single();
-
-        if (!error) fetchMedications(patient.id);
-        return { data, error };
-    };
-
-    // حذف دارو
-    const deleteMedication = async (medicationId) => {
-        if (!patient) return { error: new Error("No patient logged in") };
-        const { data, error } = await supabase
-            .from('medications')
-            .delete()
-            .eq('id', medicationId)
-            .eq('patient_id', patient.id);
-
-        if (!error) fetchMedications(patient.id);
-        return { data, error };
-    };
-
-    // ورود کاربر
-    const login = async (email, password) => {
-        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-        if (!error) fetchPatient(data.user.id);
-        return { error, data };
-    };
-
-    // ثبت نام کاربر
-    const signup = async (email, password, patientData) => {
-        const { error: signUpError, data: signUpData } = await supabase.auth.signUp({ email, password });
-        if (signUpError) return { error: signUpError };
-
-        const userId = signUpData?.user?.id;
-        if (!userId) return { error: new Error("User ID not found") };
-
-        const { error: patientError } = await supabase
-            .from("patient")
-            .insert([{ auth_id: userId, ...patientData }]);
-
-        if (patientError) return { error: patientError };
-
-        await fetchPatient(userId);
-        return { data: signUpData };
-    };
-
-    // خروج
-    const logout = async () => {
-        await supabase.auth.signOut();
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!mounted) return;
+      if (error || !data.session) {
         setPatient(null);
-        setMedications([]);
-    };
+        setLoading(false);
+        return;
+      }
+      fetchPatient(data.session.user.id);
+    });
 
-    return (
-        <PatientContext.Provider value={{
-            patient,
-            medications,
-            loading,
-            login,
-            signup,
-            logout,
-            addMedication,
-            updateMedication,
-            deleteMedication,
-            fetchMedications
-        }}>
-            {children}
-        </PatientContext.Provider>
-    );
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      if (session?.user) fetchPatient(session.user.id);
+      else {
+        setPatient(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [fetchPatient]);
+
+  const login = useCallback(async (email, password) => {
+    setLoading(true);
+    const result = await supabase.auth.signInWithPassword({ email, password });
+    if (result.error) {
+      setLoading(false);
+      return result;
+    }
+    const patientResult = await fetchPatient(result.data.user.id);
+    if (!patientResult.data) {
+      await supabase.auth.signOut();
+      return { data: null, error: patientResult.error || new Error('پرونده سلامت این حساب پیدا نشد.') };
+    }
+    return result;
+  }, [fetchPatient]);
+
+  const signup = useCallback(async (email, password, patientData) => {
+    setLoading(true);
+    const signUpResult = await supabase.auth.signUp({ email, password });
+    if (signUpResult.error) {
+      setLoading(false);
+      return signUpResult;
+    }
+
+    const userId = signUpResult.data?.user?.id;
+    if (!userId) {
+      setLoading(false);
+      return { data: null, error: new Error('شناسه کاربر دریافت نشد.') };
+    }
+
+    const { error } = await supabase
+      .from('patient')
+      .insert([{ auth_id: userId, ...patientData }]);
+
+    if (error) {
+      await supabase.auth.signOut();
+      setLoading(false);
+      return { data: null, error };
+    }
+
+    await fetchPatient(userId);
+    return { data: signUpResult.data, error: null };
+  }, [fetchPatient]);
+
+  const logout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) setPatient(null);
+    return { error };
+  }, []);
+
+  const value = useMemo(() => ({ patient, loading, login, signup, logout }), [
+    patient, loading, login, signup, logout,
+  ]);
+
+  return <PatientContext.Provider value={value}>{children}</PatientContext.Provider>;
 };

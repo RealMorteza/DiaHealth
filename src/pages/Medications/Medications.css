@@ -1,155 +1,18 @@
-.med-page {
-  padding: 1rem;
-}
-
-.med-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.med-header h2 {
-  color: #4a90e2;
-  font-size: 1.4rem;
-}
-
-.add-med {
-  background-color: #4a90e2;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-  font-family: 'iransans';
-}
-
-.add-med:hover {
-  background-color: #2f6cb3;
-}
-
-.med-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.med-card {
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.med-info {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-}
-
-.time {
-  display: block;
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.med-actions {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.med-actions input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  accent-color: #4a90e2;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.med-actions button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-.med-actions input[type="checkbox"]:checked~.med-info,
-.med-actions input[type="checkbox"]:checked {
-  opacity: 0.5;
-  text-decoration: line-through;
-}
-
-.loading-text {
-  background: linear-gradient(90deg, #919191 25%, #fff 50%, #8f8f8f 75%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: none;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 1.5s infinite;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: #f5f5f5;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -100% 20%;
-  }
-
-  100% {
-    background-position: 100% 0;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .med-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .med-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .med-info {
-    gap: 50px;
-  }
-
-}
-
-.med-details {
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  gap: 10px;
-  flex-direction: column;
-}
-
-.med-details span {
-  display: block;
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.med-dose {
-  display: block;
-  font-size: 0.8rem;
-  color: #666;
-}
+.med-page { padding-top: 24px; }
+.round-add-button { flex: 0 0 auto; width: 46px; height: 46px; display: grid; place-items: center; border: 0; border-radius: 15px; background: var(--primary); color: #fff; font-size: 1rem; box-shadow: 0 8px 18px rgba(74, 144, 226, .26); cursor: pointer; }
+.med-list { display: flex; flex-direction: column; gap: 12px; list-style: none; }
+.med-card { padding: 16px; border: 1px solid var(--border-soft); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-sm); transition: opacity .2s; }
+.med-card.is-done { opacity: .68; }
+.med-card-top { display: flex; align-items: center; gap: 11px; }
+.med-symbol { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: var(--primary-soft); }
+.med-title { min-width: 0; flex: 1; }
+.med-title h2 { overflow: hidden; color: var(--text); font-size: 1rem; text-overflow: ellipsis; white-space: nowrap; }
+.med-title span { color: var(--text-muted); font-size: .8rem; }
+.done-button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: #fff; color: var(--text-light); cursor: pointer; }
+.done-button.checked { border-color: var(--success); background: var(--success); color: #fff; }
+.med-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.med-meta span { padding: 6px 9px; border-radius: 9px; background: var(--surface-muted); color: var(--text-muted); font-size: .74rem; }
+.med-notes { margin-top: 12px; padding: 10px; border-right: 3px solid var(--secondary); background: #f8fcfd; color: var(--text-muted); font-size: .78rem; line-height: 1.8; }
+.med-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border-soft); }
+.med-actions button { display: flex; align-items: center; gap: 5px; padding: 6px 9px; border: 0; background: transparent; color: var(--primary-dark); font: inherit; font-size: .76rem; cursor: pointer; }
+.med-actions button.danger-text { color: var(--danger); }

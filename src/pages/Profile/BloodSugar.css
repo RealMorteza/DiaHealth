@@ -1,0 +1,18 @@
+.blood-sugar-card { margin-top: 15px; padding: 18px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.blood-heading { margin-bottom: 3px; }
+.blood-heading > span { background: #fff3e5; color: #a56512; }
+.blood-description { color: var(--text-muted); font-size: .77rem; line-height: 1.8; }
+.blood-form { display: grid; grid-template-columns: .8fr 1.15fr 1fr auto; gap: 7px; margin-top: 14px; }
+.blood-form select, .blood-form input { min-width: 0; height: 42px; padding: 0 7px; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--text); font: inherit; font-size: .76rem; }
+.blood-form button { min-height: 42px; padding-inline: 13px; }
+.chart-wrap { position: relative; margin-top: 17px; min-height: 195px; overflow-x: auto; border-radius: 14px; background: linear-gradient(180deg, #f9fcff, #fff); }
+.blood-chart { display: block; width: 100%; min-width: 310px; }
+.chart-grid-line { stroke: #dfe9f3; stroke-width: 1; stroke-dasharray: 3 4; }
+.chart-line { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.chart-point { fill: #fff; stroke: var(--primary); stroke-width: 3; }
+.chart-y-label { fill: var(--text-light); font-size: 8px; text-anchor: end; }
+.chart-x-label { fill: var(--text-muted); font-size: 7px; text-anchor: middle; }
+.chart-year-label { fill: var(--text-muted); font-size: 8px; text-anchor: middle; }
+.chart-empty { position: absolute; inset: 52px 52px 42px; display: grid; place-items: center; color: var(--text-light); font-size: .72rem; line-height: 1.7; text-align: center; }
+.health-note { margin-top: 7px; color: var(--text-light); font-size: .68rem; text-align: center; }
+@media (max-width: 390px) { .blood-form { grid-template-columns: 1fr 1fr; } }
