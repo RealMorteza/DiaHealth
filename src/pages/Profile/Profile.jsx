@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { FaRulerVertical, FaSignOutAlt, FaWeight, FaWeightHanging } from 'react-icons/fa';
 import moment from 'moment-jalaali';
 import { usePatient } from '../../contexts/usePatient.js';
+import { canManageQuestionnaire } from '../../services/questionnaireService.js';
 import { BloodSugar } from './BloodSugar.jsx';
+import { QuestionnaireSetting } from './QuestionnaireSetting.jsx';
 import userIcon from '../../assets/icon/user-new.png';
 import './Profile.css';
 
@@ -37,10 +39,17 @@ function calculateHealthMetrics(patient) {
 }
 
 export default function ProfilePage() {
-  const { patient, logout } = usePatient();
+  const { patient, authUser, logout } = usePatient();
   const navigate = useNavigate();
   const [logoutError, setLogoutError] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
+  const canConfigureQuestionnaire = canManageQuestionnaire(
+    patient?.phone,
+    patient?.username,
+    patient?.user_name,
+    authUser?.email,
+    authUser?.phone,
+  );
 
   if (!patient) return null;
   const metrics = calculateHealthMetrics(patient);
@@ -83,6 +92,8 @@ export default function ProfilePage() {
           <article><FaWeightHanging /><strong>{metrics.idealWeight}</strong><span>وزن ایده‌آل (kg)</span></article>
         </div>
       </section>
+
+      {canConfigureQuestionnaire && <QuestionnaireSetting />}
 
       <BloodSugar patientId={patient.id} />
 

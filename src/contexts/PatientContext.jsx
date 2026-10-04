@@ -4,6 +4,7 @@ import { PatientContext } from './patient-context.js';
 
 export const PatientProvider = ({ children }) => {
   const [patient, setPatient] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchPatient = useCallback(async (authId) => {
@@ -31,17 +32,23 @@ export const PatientProvider = ({ children }) => {
       if (!mounted) return;
       if (error || !data.session) {
         setPatient(null);
+        setAuthUser(null);
         setLoading(false);
         return;
       }
+      setAuthUser(data.session.user);
       fetchPatient(data.session.user.id);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      if (session?.user) fetchPatient(session.user.id);
+      if (session?.user) {
+        setAuthUser(session.user);
+        fetchPatient(session.user.id);
+      }
       else {
         setPatient(null);
+        setAuthUser(null);
         setLoading(false);
       }
     });
@@ -59,6 +66,7 @@ export const PatientProvider = ({ children }) => {
       setLoading(false);
       return result;
     }
+    setAuthUser(result.data.user);
     const patientResult = await fetchPatient(result.data.user.id);
     if (!patientResult.data) {
       await supabase.auth.signOut();
@@ -91,18 +99,22 @@ export const PatientProvider = ({ children }) => {
       return { data: null, error };
     }
 
+    setAuthUser(signUpResult.data.user);
     await fetchPatient(userId);
     return { data: signUpResult.data, error: null };
   }, [fetchPatient]);
 
   const logout = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
-    if (!error) setPatient(null);
+    if (!error) {
+      setPatient(null);
+      setAuthUser(null);
+    }
     return { error };
   }, []);
 
-  const value = useMemo(() => ({ patient, loading, login, signup, logout }), [
-    patient, loading, login, signup, logout,
+  const value = useMemo(() => ({ patient, authUser, loading, login, signup, logout }), [
+    patient, authUser, loading, login, signup, logout,
   ]);
 
   return <PatientContext.Provider value={value}>{children}</PatientContext.Provider>;

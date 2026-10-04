@@ -16,5 +16,18 @@
 .metrics-grid strong, .metrics-grid span { display: block; }
 .metrics-grid strong { color: var(--text); font-size: 1.05rem; }
 .metrics-grid span { margin-top: 2px; color: var(--text-muted); font-size: .63rem; line-height: 1.55; }
+.questionnaire-setting { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.questionnaire-setting h2 { color: var(--text); font-size: 1rem; }
+.questionnaire-setting p { margin-top: 4px; color: var(--text-muted); font-size: .72rem; line-height: 1.7; }
+.questionnaire-error { display: block; margin-top: 5px; color: var(--danger); font-size: .68rem; }
+.questionnaire-retry { margin-top: 6px; padding: 3px 0; border: 0; background: transparent; color: var(--primary-dark); font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.toggle-switch { position: relative; flex: 0 0 auto; width: 48px; height: 27px; cursor: pointer; }
+.toggle-switch input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.toggle-switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--border); transition: background .2s; }
+.toggle-switch span::after { content: ''; position: absolute; width: 21px; height: 21px; top: 3px; right: 3px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(32,52,75,.22); transition: transform .2s; }
+.toggle-switch input:checked + span { background: var(--primary); }
+.toggle-switch input:checked + span::after { transform: translateX(-21px); }
+.toggle-switch input:disabled + span { opacity: .55; cursor: wait; }
+.toggle-switch input:focus-visible + span { outline: 3px solid rgba(74,144,226,.25); outline-offset: 2px; }
 .logout-button { width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 15px; padding: 12px; border: 1px solid #f1cccc; border-radius: 13px; background: #fff6f6; color: var(--danger); font: inherit; cursor: pointer; }
 .logout-button:disabled { opacity: .55; cursor: wait; }

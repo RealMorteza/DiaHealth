@@ -4,8 +4,11 @@ import { usePatient } from '../../contexts/usePatient.js';
 import { useMedications } from '../../contexts/useMedications.js';
 import {
   getReminderRegistration,
+  getNotificationSupport,
+  REMINDER_ERROR_EVENT,
   remindersEnabled,
   requestNotificationAccess,
+  sendTestNotification,
   setRemindersEnabled,
 } from '../../services/reminderService.js';
 import './Reminder.css';
@@ -24,13 +27,27 @@ export const ReminderPage = () => {
   const [enabled, setEnabled] = useState(() => remindersEnabled(patient?.id));
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const support = getNotificationSupport();
+  const operational = enabled && permission === 'granted' && support.supported;
 
   useEffect(() => {
     if (!patient?.id) return;
     setEnabled(remindersEnabled(patient.id));
-    getReminderRegistration().catch(() => setMessage('ثبت سرویس اعلان انجام نشد. صفحه را دوباره بارگذاری کنید.'));
-    requestNotificationAccess().then(({ permission: nextPermission }) => setPermission(nextPermission));
-  }, [patient?.id]);
+    if (support.supported) {
+      getReminderRegistration().catch((error) => setMessage(error.message || 'ثبت سرویس اعلان انجام نشد.'));
+    } else {
+      setMessage(support.reason);
+    }
+
+    const syncPermission = () => setPermission('Notification' in window ? Notification.permission : 'unsupported');
+    const showSchedulerError = (event) => setMessage(`خطای اعلان: ${event.detail.message}`);
+    window.addEventListener('focus', syncPermission);
+    window.addEventListener(REMINDER_ERROR_EVENT, showSchedulerError);
+    return () => {
+      window.removeEventListener('focus', syncPermission);
+      window.removeEventListener(REMINDER_ERROR_EVENT, showSchedulerError);
+    };
+  }, [patient?.id, support.reason, support.supported]);
 
   const enableReminders = async () => {
     setBusy(true);
@@ -38,6 +55,8 @@ export const ReminderPage = () => {
     const result = await requestNotificationAccess();
     setPermission(result.permission);
     if (result.permission !== 'granted') {
+      setRemindersEnabled(patient.id, false);
+      setEnabled(false);
       setMessage(result.permission === 'denied'
         ? 'اعلان‌ها مسدود هستند. از تنظیمات سایت مرورگر، Notification را روی Allow قرار دهید.'
         : 'برای فعال‌سازی یادآور، اجازه ارسال اعلان لازم است.');
@@ -45,12 +64,14 @@ export const ReminderPage = () => {
       return;
     }
     try {
-      await getReminderRegistration();
+      await sendTestNotification();
       setRemindersEnabled(patient.id, true);
       setEnabled(true);
-      setMessage('یادآوری داروها فعال شد. برنامه در زمان‌های ثبت‌شده اعلان می‌فرستد.');
-    } catch {
-      setMessage('فعال‌سازی اعلان انجام نشد. دوباره تلاش کنید.');
+      setMessage('اعلان آزمایشی ارسال شد و یادآوری داروها فعال است.');
+    } catch (error) {
+      setRemindersEnabled(patient.id, false);
+      setEnabled(false);
+      setMessage(`فعال‌سازی انجام نشد: ${error.message || 'دوباره تلاش کنید.'}`);
     } finally {
       setBusy(false);
     }
@@ -70,15 +91,15 @@ export const ReminderPage = () => {
         <div><span className="eyebrow">مراقبت به‌موقع</span><h1>یادآوری داروها</h1><p>در ساعت ثبت‌شده، اعلان مصرف دارو دریافت کنید.</p></div>
       </header>
 
-      <section className={`reminder-hero ${enabled ? 'active' : ''}`}>
-        <div className="reminder-bell">{enabled ? <FaBell /> : <FaBellSlash />}</div>
-        <h2>{enabled ? 'اطلاع‌رسان دارو فعال است' : 'اطلاع‌رسان دارو غیرفعال است'}</h2>
-        <p>برای عملکرد یادآور، اجازه اعلان مرورگر باید فعال باشد و اپ در مرورگر یا حالت نصب‌شده باز بماند.</p>
+      <section className={`reminder-hero ${operational ? 'active' : ''}`}>
+        <div className="reminder-bell">{operational ? <FaBell /> : <FaBellSlash />}</div>
+        <h2>{operational ? 'اطلاع‌رسان دارو فعال است' : 'اطلاع‌رسان دارو غیرفعال است'}</h2>
+        <p>با فشردن دکمه فعال‌سازی، مرورگر اجازه اعلان را درخواست می‌کند و همان لحظه یک اعلان آزمایشی می‌فرستد.</p>
         <div className={`permission-pill permission-${permission}`}><FaCheckCircle /> {permissionLabel(permission)}</div>
-        {enabled ? (
-          <button className="secondary-button reminder-action" onClick={disableReminders}>غیرفعال‌کردن یادآورها</button>
+        {operational ? (
+          <button className="secondary-button reminder-action" onClick={disableReminders} disabled={busy}>غیرفعال‌کردن یادآورها</button>
         ) : (
-          <button className="primary-button reminder-action" onClick={enableReminders} disabled={busy || permission === 'unsupported'}>
+          <button className="primary-button reminder-action" onClick={enableReminders} disabled={busy || !support.supported}>
             <FaBell /> {busy ? 'در حال فعال‌سازی…' : 'فعال‌سازی اطلاع‌رسان دارو'}
           </button>
         )}

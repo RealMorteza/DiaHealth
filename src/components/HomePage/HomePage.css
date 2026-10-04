@@ -24,3 +24,6 @@
 .video-frame { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 14px; background: var(--surface-muted); }
 .home-links { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 15px; }
 .home-links button { padding: 12px; border: 1px solid var(--border); border-radius: 13px; background: #fff; color: var(--text-muted); font: inherit; cursor: pointer; }
+.home-links .questionnaire-button { border-color: transparent; background: linear-gradient(135deg, var(--primary), #65a9ed); color: #fff; font-weight: 800; box-shadow: 0 7px 16px rgba(74,144,226,.2); }
+.home-questionnaire-error { padding: 10px 12px; border: 1px solid #f1cccc; border-radius: 13px; background: #fff6f6; color: var(--danger); font-size: .72rem; line-height: 1.7; }
+.home-questionnaire-error button { display: block; margin-top: 4px; padding: 2px 0; border: 0; background: transparent; color: var(--primary-dark); font-weight: 800; }
